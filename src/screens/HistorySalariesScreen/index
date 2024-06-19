@@ -1,0 +1,292 @@
+import React, {useState, useEffect} from 'react';
+import { StyleSheet, Text, View, Button, ScrollView, Modal, Pressable  } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+
+export default function HistorySalaries() {
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalType, setModalType] = useState('');
+    const currentMonthIndex = new Date().getMonth();
+    const [selectedMonth, setSelectedMonth] = useState(months[currentMonthIndex]);
+    const [selectedMonthIndex, setSelectedMonthIndex] = useState(currentMonthIndex);
+  
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const monthButtons = data.labels.map((month, index) => (
+        <TouchableOpacity
+          key={index}
+          style={[styles.monthButton, selectedMonth === month && styles.selectedMonthButton]}
+          onPress={() => {
+            setSelectedMonth(month);
+            setSelectedMonthIndex(index);
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <Text style={[styles.monthButtonText, selectedMonth === month && { backgroundColor: 'red' }]}>{month}</Text>
+        </TouchableOpacity>
+      ));
+    const years = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i);
+  
+    const openModal = (type) => {
+      setModalType(type);
+      setModalVisible(true);
+    };
+
+    const renderModalContent = () => {
+        if (modalType === 'month') {
+          return (
+            <View style={styles.modalContent}>
+              {months.map((month) => (
+                <TouchableOpacity key={month} onPress={() => { setSelectedMonth(month); setModalVisible(false); }} style={styles.modalOption}>
+                  <Text style={styles.modalText}>{month}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          );
+        } else if (modalType === 'year') {
+          return (
+            <View style={styles.modalContent}>
+              {years.map((year) => (
+                <TouchableOpacity key={year} onPress={() => { setSelectedYear(year); setModalVisible(false); }} style={styles.modalOption}>
+                  <Text style={styles.modalText}>{year}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          );
+        }
+      };
+  return (
+    <ScrollView style={styles.container}>
+        <View>
+            <TouchableOpacity
+                style={styles.buttonMonth}
+                onPress={() => setModalVisible(true)}
+              >
+                <Text>Select Month :<Text style={[styles.buttonMonth, {color:'red'}]}> {selectedMonth}</Text></Text>
+              </TouchableOpacity> 
+              <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <ScrollView >
+            {monthButtons.map((button, index) => (
+              <View key={index} style={{ marginHorizontal: 5 }}>
+                {button}
+              </View>
+            ))}
+            </ScrollView>
+
+          </View>
+          <Pressable
+            style={styles.modalCloseButton}
+            onPress={() => setModalVisible(!modalVisible)}
+          >
+            <Text style={styles.modalCloseButtonText}>Close</Text>
+          </Pressable>
+        </View>
+      </Modal>
+            <TouchableOpacity style={styles.buttonYear}>
+                <Text>Chooser Year</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonSerach}>
+                <Text>Search</Text>
+            </TouchableOpacity>
+        </View>
+      <View style={styles.content}>
+        <View style={ styles.takeHomePayContainer}>
+        <Text style={styles.monthlyText}>This <Text style={styles.highlight}>Monthly</Text> Take-Home Pay is</Text>
+        <Text style={styles.takeHomePay}>IDR 5,669.350</Text>
+        </View>
+
+        <View style={styles.taxDetails}>
+          <Text style={styles.taxableIncome}>Taxable Income</Text>
+          <Text style={styles.amount}>$7,610.35</Text>
+        </View>
+        <View style={styles.taxDetails}>
+          <Text style={styles.super}>Super</Text>
+          <Text style={styles.amount}>$722.98</Text>
+        </View>
+        <View style={styles.taxDetails}>
+          <Text style={styles.totalTaxes}>Total Taxes</Text>
+          <Text style={styles.amount}>$1,941.00</Text>
+        </View>
+        <View style={styles.taxDetails}>
+          <Text style={styles.incomeTax}>Income Tax</Text>
+          <Text style={styles.amount}>$1,789.13</Text>
+        </View>
+        <View style={styles.taxDetails}>
+          <Text style={styles.medicare}>Medicare</Text>
+          <Text style={styles.amount}>$133.33</Text>
+        </View>
+        <View style={styles.taxDetails}>
+          <Text style={styles.otherTaxes}>Other Taxes & Levies</Text>
+          <Text style={styles.amount}>$152.21</Text>
+        </View>
+        <View style={styles.taxDetails}>
+          <Text style={styles.taxOffsets}>Tax Offsets</Text>
+          <Text style={styles.amount}>-</Text>
+        </View>
+        <View style={{ paddingTop:30 }}>
+
+        <Button title="View Payslip Details" color="#EC353A" onPress={() => {}} />
+        </View>
+        
+      </View>
+
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    // backgroundColor: '#fff',
+    margin:30
+  },
+  header: {
+    backgroundColor: '#EC353A',
+    padding: 20,
+    alignItems: 'center',
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 18,
+  },
+  annual: {
+    fontWeight: 'bold',
+  },
+  salaryText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  content: {
+    backgroundColor: '#fff',
+    padding: 25,
+    top:30,
+    paddingBottom:60
+    
+  },
+  monthlyText: {
+    fontSize: 13,
+    letterSpacing:1,
+    fontWeight:'600'
+  },
+  highlight: {
+
+    color:'#EC353A',
+    
+  },
+  takeHomePayContainer:{
+    alignContent:'center',
+    alignSelf:'center'
+
+  },
+  takeHomePay: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    textAlign:'center',
+    paddingVertical:20
+  },
+  taxDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 5,
+  },
+  amount: {
+    fontWeight: 'bold',
+  },
+  taxableIncome: {},
+  super: {},
+  totalTaxes: {},
+  incomeTax: {},
+  medicare: {},
+  otherTaxes: {},
+  taxOffsets: {},
+
+  recentSalaryContainer: {
+    marginTop: 30,
+    backgroundColor: '#f0f0f0',
+    padding: 25,
+  },
+  recentSalaryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  recentSalaryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  recentSalaryItemLast: {
+    borderBottomWidth: 0,
+  },
+  recentSalaryMonth: {
+    fontSize: 16,
+    color: '#333',
+  },
+  recentSalaryAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  buttonMonth: {
+    backgroundColor: '#EC353A',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonYear: {
+    backgroundColor: '#EC353A',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonSearch: {
+    backgroundColor: '#EC353A',
+    padding: 10,
+    borderRadius: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: 300,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalOption: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    width: '100%',
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+  },
+});
+
