@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBell, faFileInvoiceDollar, faUsers, faBars, faArrowLeft, faSignInAlt, faUserCheck, faPersonBooth, faHistory, faAddressCard } from '@fortawesome/free-solid-svg-icons';
 
@@ -9,6 +9,10 @@ const DashboardEmployeeManagement = ({ navigation }) => {
         navigation.navigate('Employees');
         console.log('Employees Screen');
     }
+    const goToPosition = () => {
+        navigation.navigate('Position Job');
+        console.log('PositionJob Screen');
+    }
     const goToDashboardAdmin = () => {
         navigation.navigate('Dashboard Admin');
         console.log('Dashboard Admin Screen');
@@ -16,6 +20,10 @@ const DashboardEmployeeManagement = ({ navigation }) => {
     const goToManageDashboarUser = () => {
         navigation.navigate('Manage User Login');
         console.log('Manage User Login Screen');
+    }
+    const gotoManageOvertime = () => {
+        navigation.navigate('Management Overtime');
+        console.log('Management Overtime Screen');
     }
 
 
@@ -32,24 +40,25 @@ const DashboardEmployeeManagement = ({ navigation }) => {
 
             <View style={styles.contentWhite}>
                 <TouchableOpacity style={[styles.menuItem, styles.fullWidth, {borderLeftColor:'#6759ff'}]} onPress={goToEmployees}>
-                    <FontAwesomeIcon icon={faUsers} size={32} color="#6759ff" />
+                    <Image source={require('../../assets/images/Employees_v3.jpg')} style={styles.image} />
+                    
                     <Text style={[styles.menuText, {color:'#6759ff'}]}>Employees</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.menuItem, styles.fullWidth , {borderLeftColor:'#6759ff'}]} onPress={goToManageDashboarUser}>
-                    <FontAwesomeIcon icon={faUserCheck} size={32} color="#6759ff" />
+                <Image source={require('../../assets/images/user_login.jpg')} style={styles.image} />
                     <Text style={[styles.menuText, {color:'#6759ff'}]}>Manage User Login</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.menuItem, styles.fullWidth, {borderLeftColor:'#6759ff'}]} onPress={goToEmployees}>
-                    <FontAwesomeIcon icon={faAddressCard} size={32} color="#6759ff" />
+                <TouchableOpacity style={[styles.menuItem, styles.fullWidth, {borderLeftColor:'#6759ff'}]} onPress={goToPosition}>
+                <Image source={require('../../assets/images/job.jpg')} style={styles.image} />
                     <Text style={[styles.menuText, {color:'#6759ff'}]}>Position Jobs</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.menuItem, styles.fullWidth, {borderLeftColor:'#6759ff'}]}>
-                    <FontAwesomeIcon icon={faHistory} size={32} color="#6759ff" />
+                <TouchableOpacity style={[styles.menuItem, styles.fullWidth, {borderLeftColor:'#6759ff'}]} onPress={gotoManageOvertime}>
+                <Image source={require('../../assets/images/OvertimeManagement.jpg')} style={styles.image} />
                     <Text style={[styles.menuText, {color:'#6759ff'}]}>Overtime Management</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.menuItem, styles.fullWidth, {borderLeftColor:'#6759ff'}]}>
-                    <FontAwesomeIcon icon={faPersonBooth} size={32} color="#6759ff" />
+                <Image source={require('../../assets/images/leave.jpg')} style={styles.image} />
                     <Text style={[styles.menuText, {color:'#6759ff'}]}>Leave Management</Text>
                 </TouchableOpacity>
             </View>
@@ -69,8 +78,8 @@ const styles = StyleSheet.create({
     headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 30,
-        paddingVertical: 30
+        paddingHorizontal: 40,
+        paddingVertical: 50
     },
     contentWhite: {
         backgroundColor: 'white',
@@ -118,6 +127,13 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         textAlign: 'center',
     },
+
+    image: {
+        width: 50,
+        height: 50,
+        resizeMode: 'contain',
+        marginRight: 10,
+      },
 });
 
 export default DashboardEmployeeManagement;

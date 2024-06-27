@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Modal, Pressable, SafeAreaView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Modal, Pressable, SafeAreaView, Alert, Linking  } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import NetInfo from '@react-native-community/netinfo';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import  {fetchlatestAbsensiLog}  from '../../api/getLatestAttendance/index';
-
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faCheckCircle, faHourglassHalf } from '@fortawesome/free-solid-svg-icons';
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
 
@@ -29,12 +30,15 @@ export default function HistoryAttendance () {
   const [latestData, setLatestData] = useState({});const [locationName, setLocationName] = useState('');
   
   const navigation = useNavigation();
-  const initialRegion = {
-    latitude: 37.78825, // Initial latitude
-    longitude: -122.4324, // Initial longitude
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-};
+  const viewOnMap = () => {
+    if (latestData && latestData.latitude && latestData.longitude) {
+      const url = `https://www.google.co.id/maps/@${latestData.latitude},${latestData.longitude},20z?entry=ttu`;
+      Linking.openURL(url);
+    } else {
+      Alert.alert('Error', 'Coordinates not available.');
+    }
+  };
+  
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -309,25 +313,40 @@ export default function HistoryAttendance () {
               </View>
             </SafeAreaView>
             <View style={styles.recentCheckInContainer}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                <Text style={styles.recentCheckInTitle}>Today's Check-In History</Text>
-                <TouchableOpacity onPress={goToAllHistoryAttendance}><Text style={{ color: 'blue', textDecorationLine: 'underline' }}>View all</Text></TouchableOpacity>
-              </View>
-              <ScrollView style={styles.recentCheckInList}>
-                <View style={styles.recentCheckInItem}>
-                  <Text style={styles.recentCheckInTime}>{latestData ? latestData.waktu_absensi : 'Belum ada kehadiran'}</Text>
-                  
-                  <Text style={styles.recentCheckInLocation}>{latestData ? latestData.waktu_absensi : 'Belum ada kehadiran'}</Text>
-                  <Text style={styles.recentCheckInStatus}>Completed</Text>
-                </View>
-                <View style={styles.recentCheckInItem}>
-                  <Text style={styles.recentCheckInTime}>08:15 AM</Text>
-                  <Text style={styles.recentCheckInLocation}>Conference Room</Text>
-                  <Text style={styles.recentCheckInStatus}>Completed</Text>
-                </View>
-                {/* Add more recent check-in items here */}
-              </ScrollView>
-            </View>
+      <View style={styles.headerContainer}>
+        <Text style={styles.recentCheckInTitle}>Today's Check-In History</Text>
+        <TouchableOpacity onPress={goToAllHistoryAttendance}>
+          <Text style={styles.viewAllText}>View all</Text>
+        </TouchableOpacity>
+      </View>
+      <ScrollView style={styles.recentCheckInList}>
+        <View style={styles.recentCheckInItem}>
+          <View style={styles.itemHeader}>
+            <Text style={styles.recentCheckInTime}>
+              {latestData ? latestData.waktu_absensi : 'Belum ada kehadiran'}
+            </Text>
+            <FontAwesomeIcon 
+              icon={latestData && latestData.id_absensi_status == 2 ? faCheckCircle : faHourglassHalf} 
+              size={24} 
+              color={latestData && latestData.id_absensi_status == 2 ? '#4CAF50' : '#FFC107'} 
+            />
+          </View>
+          {latestData && (
+            <>
+              <Text style={styles.recentCheckInLocation}>Latitude: {latestData.latitude}</Text>
+              <Text style={styles.recentCheckInLocation}>Longitude: {latestData.longitude}</Text>
+              <Text style={styles.recentCheckInStatus}>
+                {latestData.id_absensi_status == 2 ? 'Completed' : 'On-Progress'}
+              </Text>
+              <TouchableOpacity onPress={viewOnMap} style={styles.mapButton}>
+                      <Text style={styles.mapButtonText}>View on Map</Text>
+                </TouchableOpacity>
+            </>
+          )}
+        </View>
+        {/* Add more recent check-in items here */}
+      </ScrollView>
+    </View>
 
           </ScrollView>
         )}
@@ -480,36 +499,54 @@ const styles = StyleSheet.create({
     color: '#EC353A',
   },
   recentCheckInContainer: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    padding: 20,
+    backgroundColor: '#f5f5f5',
     borderRadius: 10,
+    margin: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 5,
     elevation: 5,
-    marginBottom:50,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
   },
   recentCheckInTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    color: '#333',
+  },
+  viewAllText: {
+    color: 'blue',
+    textDecorationLine: 'underline',
   },
   recentCheckInList: {
-    maxHeight: 120,
+    maxHeight: 200, // Adjust this value based on your needs
   },
   recentCheckInItem: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  itemHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    marginBottom: 10,
   },
   recentCheckInTime: {
-    fontSize: 14,
-    marginRight: 10,
+    fontSize: 16,
+    color: '#333',
   },
   recentCheckInLocation: {
     fontSize: 14,
@@ -517,7 +554,23 @@ const styles = StyleSheet.create({
   },
   recentCheckInStatus: {
     fontSize: 14,
-    color: '#41ff77',
+    color: '#333',
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+
+  mapButton: {
+    marginTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#4285F4',
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,

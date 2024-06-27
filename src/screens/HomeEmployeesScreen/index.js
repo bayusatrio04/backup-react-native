@@ -23,7 +23,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const isFocused = useIsFocused();
 
-
+  console.log(position);
 
   const [dashboardON, setDashboardON] = useState(true);
   const getGreeting = () => {
@@ -127,13 +127,21 @@ export default function HomeScreen() {
     navigation.navigate('History Salaries');
     console.log('History Salaries Screen');
   };
-  const buttonProfile = '#3498db'; 
-  const buttonPayslip = '#2ecc71';
-  const buttonAll = '#e74c3c'; 
-  const buttonActivity = '#f39c12'; 
-  const buttonSalaries = '#9b59b6'; 
-  const buttonAttendance = '#34495e'; 
-  const buttonDashboard = '#1abc9c'; 
+  const goToHistoryLetters = () => {
+    if (!isConnected) {
+      Alert.alert('No Internet Connection', 'Check your internet connection!');
+      return;
+    }
+    navigation.navigate('History Letters');
+    console.log('History Letters Screen');
+  };
+  const buttonProfile = '#FF78C4';
+  const buttonPayslip = '#E1AEFF';
+  const buttonAll = '#e74c3c';
+  const buttonCreateLetter = '#FFBDF7';
+  const buttonSalaries = '#FFECEC';
+  const buttonAttendance = '#E1AEFF';
+
   const goToPayslip = () => {
     if (!isConnected) {
         Alert.alert('No Internet Connection', 'Check your internet connection!');
@@ -169,42 +177,56 @@ const goToOvertimeLetter = () => {
 
 
   return (
-    <View style={styles.homeEmployee}>
+    <ScrollView style={styles.homeEmployee}>
       <View style={styles.dasar}>
         <SafeAreaView style={styles.containerNav}>
-          <TouchableOpacity style={styles.menuButton} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity style={styles.profileButton}>
+              <Image source={require('../../assets/images/avatar5.jpg')} style={styles.profileImage} />
+            </TouchableOpacity>
+
+
+          <View style={styles.rightButtonsContainer}>
+            <TouchableOpacity style={styles.notificationButton}>
+              <FontAwesomeIcon icon={faBell} size={25} color="#f8f8f8" />
+            </TouchableOpacity>
+            {/* <TouchableOpacity style={styles.menuButton} onPress={() => setModalVisible(true)}>
             <FontAwesomeIcon icon={faBars} size={30} color="#900" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.notificationButton}>
-            <FontAwesomeIcon icon={faBell} size={25} color="#900" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.profileButton} >
-            <Image source={require('../../assets/images/avatar5.jpg')} style={styles.profileImage} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+
+          </View>
         </SafeAreaView>
         <View style={styles.textContainer}>
           <Text style={styles.goodAfternoon}>{greeting}</Text>
           <Text style={styles.namaLengkap}>Hi! {nama_depan}</Text>
         </View>
+        {position == 6 ? (
         <View style={styles.menuContainer}>
           <View style={styles.attendanceContainer}>
-          {position == 12 ? (
+         
               <TouchableOpacity style={styles.buttonDashboard} onPress={goToDashboardAdmin}>
                 <Text style={styles.modalText}>Dashboard Admin</Text>
               </TouchableOpacity>
+              </View>
+              </View>
             ) : (
+              <View style={styles.menuContainer}>
+              <View style={styles.attendanceContainer}>
+              <TouchableOpacity style={styles.buttonDashboard}>
+                <Text style={styles.modalText}></Text>
+              </TouchableOpacity>
               <Attendance loading={loading} setLoading={setLoading} />
+              </View>
+              </View>
             )}
-          </View>
-        </View>
+
       </View>
       {!isConnected && <Text style={styles.disconnected}>You are offline</Text>}
-      <ScrollView>
+      <View>
         <View style={styles.MenuController}>
           <View style={styles.row}>
             <View style={styles.whiteBox}>
               <View style={styles.imageContainer}>
-                <Image source={require('../../assets/images/history_of_attendance.png')} style={styles.image} />
+                <Image source={require('../../assets/images/history_attendance_v2.jpg')} style={styles.image} />
               </View>
               <TouchableOpacity onPress={goToHistoryAttendance}>
                 <Text style={styles.caption}>History of Attendance</Text>
@@ -212,7 +234,7 @@ const goToOvertimeLetter = () => {
             </View>
             <View style={styles.whiteBox}>
               <View style={styles.imageContainer}>
-                <Image source={require('../../assets/images/history_of_salaries.png')} style={styles.image} />
+                <Image source={require('../../assets/images/history_salary_v2.jpg')} style={styles.image} />
               </View>
               <TouchableOpacity onPress={goToHistorySalaries}>
                 <Text style={styles.caption}>History of Salaries</Text>
@@ -220,99 +242,45 @@ const goToOvertimeLetter = () => {
             </View>
           </View>
           <View style={styles.row}>
-            <View style={styles.redBox}>
-              <View style={styles.boxTransparant} />
-              <View style={styles.boxTransparant2} />
-              <View style={{ position: 'absolute', left: 10, top: 30 }}>
-                <View style={{ backgroundColor: 'white', width: 35, height: 35, borderRadius: 30, justifyContent: 'center', alignItems: 'center' }}>
+            <View style={styles.whiteBox}>
+              <View style={styles.imageContainer}>
+                <Image source={require('../../assets/images/overtime.jpg')} style={styles.image} />
+              </View>
+              <View >
+                {/* <View style={{ backgroundColor: 'white', width: 35, height: 35, borderRadius: 30, justifyContent: 'center', alignItems: 'center' }}>
                   <FontAwesomeIcon icon={faFileLines} size={20} color="#900" />
-                </View>
+                </View> */}
                 <TouchableOpacity onPress={goToOvertimeLetter}>
                   <Text style={styles.redBoxText}>Overtime Work Letter</Text>
                 </TouchableOpacity>
               </View>
             </View>
-            <View style={styles.redBox}>
-              <View style={styles.boxTransparant} />
-              <View style={styles.boxTransparant2} />
-              <View style={{ position: 'absolute', left: 10, top: 30 }}>
-                <View style={{ backgroundColor: 'white', width: 35, height: 35, borderRadius: 30, justifyContent: 'center', alignItems: 'center' }}>
-                  <FontAwesomeIcon icon={faArrowRightFromBracket} size={20} color="#900" />
-                </View>
-                <TouchableOpacity onPress={handleLogout}>
-                  <Text style={styles.redBoxText}>Logout Account</Text>
-                </TouchableOpacity>
+            
+
+            <View style={styles.whiteBox}>
+            <TouchableOpacity onPress={handleLogout}>
+              <View style={{ backgroundColor: '#f8f8f8', width: 50, height: 50, borderRadius: 30, justifyContent: 'center', alignItems: 'center' }}>
+                <FontAwesomeIcon icon={faArrowRightFromBracket} size={30} color="#900" />
               </View>
+              </TouchableOpacity>
+          
+       
+                <Text style={styles.Logout}>Logout Account</Text>
+            
+         
+
             </View>
           </View>
         </View>
-      </ScrollView>
+      </View>
 
-      <Modal
-  animationType="slide"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => {
-    setModalVisible(!modalVisible);
-  }}
->
-  <View style={styles.modalView}>
-    <TouchableOpacity
-      style={styles.closeButton}
-      onPress={() => setModalVisible(!modalVisible)}
-    >
- 
-      <FontAwesomeIcon icon={faXmark} size={30} color="#900" />
-    </TouchableOpacity>
-    
-    {/* Baris 1 */}
-    <View style={styles.buttonRow}>
-      <TouchableOpacity style={[styles.button, { backgroundColor: buttonAll }]} onPress={goToProfile}>
-        <Text style={styles.modalText}>Profile</Text>
-      </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button,  { backgroundColor: buttonAll } ]} onPress={goToPayslip}>
-        <Text style={styles.modalText}>PaySlip</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.button,  { backgroundColor: buttonAll }]} onPress={goToAllLetter}>  
-        <Text style={styles.modalText}>Create Letters</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.button, { backgroundColor: buttonAll } ]}>
-        <Text style={styles.modalText}>History Letters</Text>
-      </TouchableOpacity>
-    </View>
-
-    {/* Baris 2 */}
-    <View style={styles.buttonRow}>
-      <TouchableOpacity style={[styles.button,  { backgroundColor: buttonAll }]}>
-        <Text style={styles.modalText}>Salaries</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={[styles.button, { backgroundColor: buttonAll }]}>
-        <Text style={styles.modalText}>Attendance</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.button,  { backgroundColor: buttonAll }]}>
-        <Text style={styles.modalText}>Cuti</Text>
-      </TouchableOpacity>
-
-   
-    </View>
-    <View style={styles.buttonRow}>
-
-     
-        <Text style={styles.quickAccess}>Quick Access</Text>
-  
-    </View>
-  </View>
-</Modal>
 
       <TouchableOpacity onPress={() => setModalVisible(true)}>
 
       <BottomNavigation />
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 
 }

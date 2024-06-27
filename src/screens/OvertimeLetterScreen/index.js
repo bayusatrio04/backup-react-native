@@ -1,40 +1,105 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Button, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import DateTimePicker from 'react-native-ui-datepicker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import dayjs from 'dayjs';
-const OvertimeLetterScreen = () => {
-    const [overtimeDate, setOvertimeDate] = useState('');
+import axios from 'axios';
+import SweetAlert from 'react-native-sweet-alert';
+const OvertimeLetterScreen = ({navigation}) => {
+    const [overtimeDate, setOvertimeDate] = useState(dayjs());
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [totalHours, setTotalHours] = useState('');
     const [overtimeReason, setOvertimeReason] = useState('');
-    const [date, setDate] = useState(dayjs());
-    const handleSubmit = () => {
-        const formattedDate = dayjs(date).format('YYYY-MM-DD');
-        console.log('Overtime Date:', formattedDate);
-        console.log('Start Time:', startTime);
-        console.log('End Time:', endTime);
-        console.log('Total Hours:', totalHours);
-        console.log('Overtime Reason:', overtimeReason);
+
+    useEffect(() => {
+        if (startTime && endTime) {
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+
+            const startTotalMinutes = startHour * 60 + startMinute;
+            const endTotalMinutes = endHour * 60 + endMinute;
+
+            if (endTotalMinutes > startTotalMinutes) {
+                const durationMinutes = endTotalMinutes - startTotalMinutes;
+                const durationHours = durationMinutes / 60;
+                setTotalHours(durationHours.toFixed(2)); // Format to 2 decimal places
+            } else {
+                setTotalHours('');
+            }
+        }
+    }, [startTime, endTime]);
+
+    const handleSubmit = async () => {
+        const formattedDate = dayjs(overtimeDate).format('YYYY-MM-DD');
+
+        const payload = {
+            overtime_date: formattedDate,
+            start_time: startTime,
+            end_time: endTime,
+            total_hours: totalHours,
+            overtime_reason: overtimeReason,
+            status: "Pending",
+        };
+
+        console.log('Payload:', payload);
+
+        try {
+         
+            const token = await AsyncStorage.getItem('accessToken');
+            if (!token) {
+                Alert.alert('Token Tidak ada');
+            }
+            const response = await axios.post(
+                'https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/absence/overtime/create',
+                payload,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            console.log('Response:', response.data);
+            SweetAlert.showAlertWithOptions({
+                title: 'Messages',
+                subTitle: 'Overtime request submitted successfully!',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                otherButtonTitle: 'Cancel',
+                otherButtonColor: '#dedede',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: {
+                  fontSize: 40
+                }
+              });
+              navigation.replace('Home');
+              navigation.replace('Create Overtime Letter');
+        } catch (error) {
+            console.error('Error submitting overtime request:', error);
+            Alert.alert('Error', 'Failed to submit overtime request. Please try again.');
+        }
     };
 
     return (
         <ScrollView style={styles.container}>
             <Text style={styles.header}>Overtime Request</Text>
             <DateTimePicker
-        mode="single"
-        date={date}
-        onChange={(params) => setDate(params.date)}
-      />
+                mode="single"
+                date={overtimeDate}
+                onChange={(params) => setOvertimeDate(params.date)}
+            />
             <TextInput
                 style={styles.input}
-                placeholder="Start Time"
+                placeholder="Start Time (HH:mm)"
                 value={startTime}
                 onChangeText={setStartTime}
             />
             <TextInput
                 style={styles.input}
-                placeholder="End Time"
+                placeholder="End Time (HH:mm)"
                 value={endTime}
                 onChangeText={setEndTime}
             />
@@ -42,7 +107,7 @@ const OvertimeLetterScreen = () => {
                 style={styles.input}
                 placeholder="Total Hours"
                 value={totalHours}
-                onChangeText={setTotalHours}
+                editable={false} // Disable input
             />
             <TextInput
                 style={styles.input}
@@ -79,8 +144,8 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     button: {
-        marginBottom:30,
-        backgroundColor: '#ff2727',
+        marginBottom: 30,
+        backgroundColor: '#E1AEFF',
         borderRadius: 8,
         padding: 16,
         alignItems: 'center',

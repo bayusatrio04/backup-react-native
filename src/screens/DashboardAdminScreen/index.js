@@ -1,36 +1,63 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBell, faFileInvoiceDollar, faUsers, faBars, faArrowLeft, faHistory, faPersonBooth } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faFileInvoiceDollar, faUsers, faArrowLeft, faPersonWalkingArrowRight, faCalendarPlus, faArrowRight, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DashboardAdminScreen = ({ navigation }) => {
+  const [departmentCounts, setDepartmentCounts] = useState([]);
+  const [employees, setEmployees] = useState([]);
+
+  useEffect(() => {
+    fetchEmployeeCounts();
+  }, []);
+
+  const fetchEmployeeCounts = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No token found');
+      }
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      const response = await axios.get('https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/count/total', config);
+      setDepartmentCounts(response.data);
+    } catch (error) {
+      console.error('Error fetching department counts:', error);
+    }
+  };
 
   const goToEmployeeManagement = () => {
     navigation.navigate('Employee Management');
-    console.log('Employee Management Screen');
-  }
+  };
+
+  const goToPayrollManagement = () => {
+    navigation.navigate('Payroll Management');
+  };
+
+  const goToAbsenceManagement = () => {
+    navigation.navigate('Absence Management');
+  };
+
   const goToHome = () => {
     navigation.navigate('Home');
-    console.log('Home Screen');
-  }
-    const renderCarouselItem = ({ item }) => (
-    <View style={styles.carouselItem}>
-      <Text style={styles.department}>{item.department}</Text>
-      <Text style={styles.count}>{item.count} people</Text>
-    </View>
-  );
-  const totalEmployees = [
-    { department: 'Admin Penjualan', count: 2 },
-    { department: 'General Manager', count: 2 },
-    { department: 'Produksi', count: 7 },
-    { department: 'Design Grafis', count: 5 },
-    { department: 'Editor', count: 2 },
-    { department: 'Lapangan', count: 5 },
-    { department: 'Keuangan', count: 2 },
-    { department: 'Media Social', count: 5 },
-    { department: 'Penjualan', count: 5 },
-    { department: 'Team Leader', count: 5 },
-  ];
+  };
+
+  const renderDepartmentCounts = () => {
+    return Object.keys(departmentCounts).map((department, index) => (
+      <View key={index} style={styles.statusContainer}>
+        <View style={styles.statusBox}>
+          <Text style={styles.statusTitle}>{department}</Text>
+          <Text style={styles.statusCount}>{departmentCounts[department]} people</Text>
+        </View>
+      </View>
+    ));
+  };
+
   const images = [
     require('../../assets/images/avatar/avatar-1.jpg'),
     require('../../assets/images/avatar/avatar-2.jpg'),
@@ -42,19 +69,39 @@ const DashboardAdminScreen = ({ navigation }) => {
     require('../../assets/images/avatar/img-avatar-2.jpg'),
     require('../../assets/images/avatar/img-avatar-3.jpg'),
   ];
-  
-  const employees = [
-    { name: 'Janine', role: 'UX Designer' },
-    { name: 'Gloria', role: 'QA Tester' },
-    { name: 'Mark', role: 'DevOps' },
-    { name: 'Mark', role: 'DevOps' },
-    { name: 'Mark', role: 'DevOps' },
-  ];
-  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [employeeResponse, positionResponse] = await Promise.all([
+          axios.get('https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/frontend/web/index.php?r=employees'),
+          axios.get('https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/frontend/web/index.php?r=position-employees')
+        ]);
+
+        const employeesData = employeeResponse.data;
+        const positionsData = positionResponse.data;
+
+        const filteredEmployeesData = employeesData.filter(employee => employee.position_id !== 12);
+        const updatedEmployees = filteredEmployeesData.map(employee => {
+          const position = positionsData.find(pos => pos.id === employee.position_id);
+          return {
+            ...employee,
+            position_name: position ? position.position_name : 'Unknown'
+          };
+        });
+
+        setEmployees(updatedEmployees.slice(0, 3));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const getRandomImage = () => {
     return images[Math.floor(Math.random() * images.length)];
   };
-  
 
   return (
     <ScrollView style={styles.container}>
@@ -73,107 +120,54 @@ const DashboardAdminScreen = ({ navigation }) => {
       <View style={styles.contentWhite}>
         <View style={styles.row}>
           <TouchableOpacity style={[styles.menuItem, { borderColor: "#6759ff" }]} onPress={goToEmployeeManagement}>
-            <FontAwesomeIcon icon={faUsers} size={32} color="#6759ff" />
+          <Image source={require('../../assets/images/employee_management_v2.jpg')} style={styles.image} />
             <Text style={[styles.menuText, { color: "#6759ff" }]}>Employee Management</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
-            <FontAwesomeIcon icon={faFileInvoiceDollar} size={32} color="#EC353A" />
+          <TouchableOpacity style={styles.menuItem} onPress={goToPayrollManagement}>
+          <Image source={require('../../assets/images/payroll_management.jpg')} style={styles.image} />
             <Text style={[styles.menuText, { color: "#EC353A" }]}>Payroll Management</Text>
           </TouchableOpacity>
         </View>
-        <Text>Quick Access</Text>
 
-        <TouchableOpacity style={[styles.menuItem, styles.fullWidth, { borderColor: "#6759ff" }]}>
-  
-          <Text style={styles.menuText}>      
-            <FontAwesomeIcon icon={faHistory} size={32} color="#6759ff" />
-            Overtime Management
-            </Text>
+        <TouchableOpacity style={[styles.menuItem, styles.fullWidth, { borderColor: "#6759ff" }]} onPress={goToAbsenceManagement}>
+          <View style={styles.absenceManagementContainer}>
+            <Image source={require('../../assets/images/absence_management_v3.jpg')} style={styles.image} />
+            <Text style={styles.absenceManagementText}>Absence Management</Text>
+            <FontAwesomeIcon icon={faChevronRight} size={20} color="#6759ff" />
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.menuItem, styles.fullWidth]}>
-          <Text style={styles.menuText}>
-          <FontAwesomeIcon icon={faPersonBooth} size={32} color="#EC353A" style={{ left:30 }} />
-            Leave Management</Text>
+        <View style={styles.letterManagementContainer}>
+            <Image source={require('../../assets/images/letter_management_v2.jpg')} style={styles.image} />
+            <Text style={styles.letterManagementText}>Permission Letter Management</Text>
+            <FontAwesomeIcon icon={faChevronRight} size={20} color="#EC353A" />
+          </View>
         </TouchableOpacity>
 
         <ScrollView horizontal style={styles.containerStatus}>
-          <View style={styles.statusContainer}>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Total Employee</Text>
-              <Text style={styles.statusCount}>40 people</Text>
-            </View>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>General Manager</Text>
-              <Text style={styles.statusCount}>2 people</Text>
-            </View>
-          </View>
-          <View style={styles.statusContainer}>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Produksi</Text>
-              <Text style={styles.statusCount}>7 people</Text>
-            </View>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Design Grafis</Text>
-              <Text style={styles.statusCount}>5 people</Text>
-            </View>
-          </View>
-          <View style={styles.statusContainer}>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Editor</Text>
-              <Text style={styles.statusCount}>2 people</Text>
-            </View>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Lapangan</Text>
-              <Text style={styles.statusCount}>5 people</Text>
-            </View>
-          </View>
-          <View style={styles.statusContainer}>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Keuangan</Text>
-              <Text style={styles.statusCount}>2 people</Text>
-            </View>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Media Social</Text>
-              <Text style={styles.statusCount}>5 people</Text>
-            </View>
-          </View>
-          <View style={styles.statusContainer}>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Penjualan</Text>
-              <Text style={styles.statusCount}>5 people</Text>
-            </View>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Team Leader</Text>
-              <Text style={styles.statusCount}>5 people</Text>
-            </View>
-          </View>
-          <View style={styles.statusContainer}>
-            <View style={styles.statusBox}>
-              <Text style={styles.statusTitle}>Admin Penjualan</Text>
-              <Text style={styles.statusCount}>2 people</Text>
-            </View>
-          </View>
+          {renderDepartmentCounts()}
         </ScrollView>
 
         <View style={styles.employeesContainer}>
           <Text style={styles.employeesTitle}>Employees</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('AddEmployee')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Employees')}>
             <Text style={styles.viewAll}>View all</Text>
           </TouchableOpacity>
         </View>
         <ScrollView horizontal contentContainerStyle={styles.employeesList} showsHorizontalScrollIndicator={false}>
-          <TouchableOpacity style={styles.employeeItem} onPress={() => navigation.navigate('AddEmployee')}>
+          <TouchableOpacity style={styles.employeeItem} onPress={() => navigation.navigate('Create Employee')}>
             <View style={styles.addNew}>
               <Text style={styles.addNewText}>+</Text>
             </View>
             <Text style={styles.employeeName}>Add new</Text>
           </TouchableOpacity>
+
           {employees.map((employee, index) => (
             <View key={index} style={styles.employeeItem}>
               <Image source={getRandomImage()} style={styles.employeeImage} />
-              <Text style={styles.employeeName}>{employee.name}</Text>
-              <Text style={styles.employeeRole}>{employee.role}</Text>
+              <Text style={styles.employeeName}>{employee.nama_depan} {employee.nama_belakang}</Text>
+              <Text style={styles.employeeRole}>{employee.position_name}</Text>
             </View>
           ))}
         </ScrollView>
@@ -184,7 +178,7 @@ const DashboardAdminScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   dasarRed: {
-    backgroundColor: '#EC353A',
+    backgroundColor: '#007BFF',
     height: 200,
   },
   headerContainer: {
@@ -192,7 +186,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 30,
-    paddingVertical: 30,
+    paddingVertical: 50,
   },
   contentWhite: {
     backgroundColor: 'white',
@@ -242,8 +236,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5e8',
     padding: 10,
-    marginBottom:10,
-    marginTop:10
+    marginBottom: 10,
+    marginTop: 10,
   },
   statusContainer: {
     flexDirection: 'row',
@@ -315,6 +309,38 @@ const styles = StyleSheet.create({
   employeeRole: {
     fontSize: 14,
     color: '#666',
+  },
+  absenceManagementContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  image: {
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
+    marginRight: 10,
+  },
+  absenceManagementText: {
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'center',
+  },
+
+
+  letterManagementContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  letterManagementText: {
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'center',
   },
 });
 

@@ -1,61 +1,79 @@
-import * as React from "react";
-import { Image, StyleSheet, View, Text, TouchableOpacity, Button } from "react-native";
+import React from "react";
+import { StyleSheet, View, Text, TouchableOpacity, Image, Alert } from "react-native";
 
-const LoginOrRegisterScreen = ({navigation}) => {
+const LoginOrRegisterScreen = ({ navigation }) => {
   const LoginButton = ({ onPress, title }) => (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   );
+  const Role = ({ onPress, title }) => (
+    <TouchableOpacity style={[styles.register, styles.textCenter]}  onPress={onPress}>
+      <Text style={{color:'red', fontSize:16}}>{title}</Text>
+    </TouchableOpacity>
+  );
+
   const goToLogin = () => {
     navigation.navigate('LoginScreen');
   };
-  return (
-    <View style={styles.loginOrRegister}>
-      <View style={styles.backgroundIcon}/>
+  const goToRegister = () => {
+    Alert.alert(
+      'Messages',
+      'Anda Admin?',
+      [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('LoginScreen'),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
-      <View
-        style={[
-          styles.buttonctafilledregister,
-          styles.buttonctafilledsignInLayout,
-        ]}
-      >
+  return (
+    <View style={styles.container}>
+      {/* Background */}
+      <View style={styles.backgroundIcon} />
+
+      {/* Register Button Section */}
+      <View style={[styles.ctaFilledRegister, styles.ctaFilledLayout]}>
         <View style={[styles.shape, styles.shapePosition]} />
-        <Text style={[styles.register, styles.textFlexBox]}>Register</Text>
+        {/* <Text style={[styles.register, styles.textCenter]}>Role Admin</Text> */}
+        <Role title="Role Admin" onPress={goToRegister} />
       </View>
-      <View
-        style={[
-          styles.buttonctafilledsignIn,
-          styles.buttonctafilledsignInLayout,
-        ]}
-      >
-        <View style={[ styles.shape1ShadowBox]} />
+
+      {/* Sign In Button Section */}
+      <View style={[styles.ctaFilledSignIn, styles.ctaFilledLayout]}>
+        <View style={styles.shape1ShadowBox} />
         <LoginButton title="Sign In" onPress={goToLogin} />
-        {/* <Button title="Sign In" onPress={goToLogin} color="#FF0000"  /> */}
-        {/* <TouchableOpacity onPress={goToLogin} style={[styles.signIn, styles.textFlexBox]}>
-          <Text style={styles.signInText}>Sign In</Text>
-        </TouchableOpacity> */}
       </View>
+
+      {/* Welcoming Messages */}
       <View style={styles.welcomingMessages}>
-        <Text style={[styles.otherwiseYouDont, styles.jobdesLogoFlexBox]}>
+        <Text style={[styles.otherwiseYouDont, styles.textLeft]}>
           Otherwise you don't get paid!
         </Text>
-        <Text
-          style={[styles.applyYourAttendance, styles.jobdesLogoFlexBox]}
-        >{`Apply Your 
-Attendance Work Now`}</Text>
+        <Text style={[styles.applyYourAttendance, styles.textLeft]}>
+          Apply Your Attendance Work Now
+        </Text>
       </View>
-      <Text style={[styles.jobdesLogo, styles.jobdesLogoFlexBox]}>
+
+      {/* DJI Pay Logo */}
+      <Text style={[styles.jobdesLogo, styles.textLeft]}>
         <Text style={styles.dji}>DJI</Text>
         <Text style={styles.pay}>Pay</Text>
       </Text>
+
+      {/* Ornament Icon */}
       <Image
         style={styles.ornamentIcon}
         resizeMode="cover"
         source={require("./assets/ornament.png")}
       />
+
+      {/* Picture Section */}
       <View style={styles.pictures}>
-        <View style={[styles.picture5, styles.picture5Layout]}>
+        <View style={[styles.picture5, styles.pictureLayout]}>
           <Image
             style={[styles.shapeIcon, styles.iconPosition]}
             resizeMode="cover"
@@ -66,7 +84,7 @@ Attendance Work Now`}</Text>
             resizeMode="cover"
             source={require("./assets/image-place-holder.png")}
           />
-          <Text style={[styles.text, styles.textFlexBox]}>$</Text>
+          <Text style={[styles.text, styles.textCenter]}>$</Text>
         </View>
         <Image
           style={[styles.picture4Icon, styles.iconLayout]}
@@ -89,6 +107,8 @@ Attendance Work Now`}</Text>
           source={require("./assets/picture-1.png")}
         />
       </View>
+
+      {/* Status Up Icon */}
       <Image
         style={styles.statusUpIcon}
         resizeMode="cover"
@@ -99,19 +119,22 @@ Attendance Work Now`}</Text>
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    overflow: "hidden",
+  },
   button: {
-    backgroundColor: '#FF0000', // Mengganti warna latar belakang tombol menjadi merah
-    padding:15,
-    // paddingHorizontal: 30,
+    backgroundColor: '#FF0000',
     borderRadius: 10,
+    padding: 15,
   },
   buttonText: {
-    color: '#fff', // Mengganti warna teks menjadi putih
+    color: '#fff',
     fontSize: 18,
-    fontWeight: 'regular',
     textAlign: 'center',
   },
-  buttonctafilledsignInLayout: {
+  ctaFilledLayout: {
     height: 56,
     width: 327,
     left: 24,
@@ -119,17 +142,16 @@ const styles = StyleSheet.create({
   },
   shapePosition: {
     borderRadius: 10,
-    bottom: "0%",
-    right: "0%",
+    bottom: 0,
+    right: 0,
     height: "100%",
-    left: "0%",
-    top: "0%",
+    left: 0,
+    top: 0,
     position: "absolute",
     width: "100%",
   },
-  textFlexBox: {
+  textCenter: {
     textAlign: "center",
-    position: "absolute",
   },
   shape1ShadowBox: {
     shadowOpacity: 1,
@@ -138,11 +160,10 @@ const styles = StyleSheet.create({
       height: 4,
     },
   },
-  jobdesLogoFlexBox: {
+  textLeft: {
     textAlign: "left",
-    position: "absolute",
   },
-  picture5Layout: {
+  pictureLayout: {
     height: 200,
     width: 200,
     position: "absolute",
@@ -161,86 +182,49 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
     bottom: "46.8%",
-    maxWidth: "100%",
-    maxHeight: "100%",
     position: "absolute",
     overflow: "hidden",
   },
   shape: {
-    borderStyle: "solid",
-    borderColor: "#ec353a",
     borderWidth: 2,
+    borderColor: "#ec353a",
   },
-
-  buttonctafilledregister: {
-    top: 700,
-  },
-  shape1: {
-    shadowColor: "rgba(245, 195, 0, 0.32)",
-    shadowRadius: 16,
-    elevation: 16,
-    backgroundColor: "#ec353a",
-    borderRadius: 10,
-    bottom: "0%",
-    right: "0%",
-    height: "100%",
-    left: "0%",
-    top: "0%",
-    position: "absolute",
-    width: "100%",
+  ctaFilledRegister: {
+    top: 750,
   },
   register: {
     color: "#ec353a",
     fontFamily: "Roboto-Regular",
     fontSize: 18,
-    top: "33.93%",
-    alignSelf:"center"
+    alignSelf: "center",
+    top: "30.93%",
   },
-  signIn: {
-
-
-    fontFamily: "Roboto-Regular",
-    fontSize: 18,
- 
-    top: "33.93%",
-    alignSelf:"center"
+  ctaFilledSignIn: {
+    top: 680,
   },
-  signInText:{
-    color: "#fff",
-  },
-  buttonctafilledsignIn: {
-    top: 628,
+  welcomingMessages: {
+    top: 520,
+    width: 278,
+    height: 130,
+    left: 24,
+    position: "absolute",
   },
   otherwiseYouDont: {
-    top: "85.11%",
+    top: "100%",
     fontSize: 12,
     fontWeight: "300",
     fontFamily: "Roboto-Light",
     color: "rgba(46, 46, 46, 0.8)",
-    left: "0%",
-    textAlign: "left",
+    left: 0,
   },
   applyYourAttendance: {
     fontSize: 28,
     lineHeight: 36,
     color: "#2e2e2e",
     fontFamily: "Roboto-Regular",
-    left: "0%",
+    left: 0,
     textAlign: "left",
-    top: "0%",
-  },
-  welcomingMessages: {
-    top: 480,
-    width: 278,
-    height: 94,
-    left: 24,
-    position: "absolute",
-  },
-  dji: {
-    color: "#000",
-  },
-  pay: {
-    color: "#ec353a",
+    top: 0,
   },
   jobdesLogo: {
     top: "54.68%",
@@ -327,13 +311,13 @@ const styles = StyleSheet.create({
     left: 0,
     position: "absolute",
   },
-  loginOrRegister: {
-    backgroundColor: "#ffffff",
-    flex: 1,
-    height: 812,
-    overflow: "hidden",
-    width: "100%",
-  },
+
+  dji: {
+    color: "#000",
+    },
+    pay: {
+      color: "#ec353a",
+      },
 });
 
 export default LoginOrRegisterScreen;

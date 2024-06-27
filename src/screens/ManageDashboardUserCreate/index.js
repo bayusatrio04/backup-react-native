@@ -18,7 +18,7 @@ const ManageDashboardUserCreate = ({ navigation }) => {
         employee_id: '',
         username: '',
         password: '',  // Default password
-        email: '',
+        status: 10,
     });
 
     useEffect(() => {
@@ -82,7 +82,7 @@ const ManageDashboardUserCreate = ({ navigation }) => {
                 setFormData({
                     employee_id: employee_id,
                     username: username,
-                    email: employee.email,
+               
                     password: defaultPassword,
                 });
                 setSelectedPosition(employee.id + " | "+ employee.nama_depan + " "+ employee.nama_belakang);
@@ -125,9 +125,10 @@ const ManageDashboardUserCreate = ({ navigation }) => {
                 'https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/auth/register',
                 {
                     username: formData.username,
-                    email: formData.email,
+         
                     password: formData.password,
                     employee_id: formData.employee_id,
+                    status: 10,
                 },
                 {
                     headers: {
@@ -137,9 +138,9 @@ const ManageDashboardUserCreate = ({ navigation }) => {
                 }
             );
     
-            console.log('Server Response:', response.data);
+   
     
-            if (response.status === 200) {
+          
                 SweetAlert.showAlertWithOptions({
                     title: 'Messages',
                     subTitle: 'Berhasil mebuat user login data karyawan',
@@ -154,46 +155,15 @@ const ManageDashboardUserCreate = ({ navigation }) => {
                     }
                 });
                 console.log('Data karyawan berhasil disimpan ke database!');
-                setFormData({
-                    employee_id: '',
-                    username: '',
-                    password: '',
-                    email: '', 
-                });
+
                 navigation.navigate("Employee Management");
                 navigation.navigate("Manage User Login");
-            } else {
-                SweetAlert.showAlertWithOptions({
-                    title: 'Messages',
-                    subTitle: 'Gagal menyimpan data karyawan ke database.',
-                    confirmButtonTitle: 'OK',
-                    confirmButtonColor: '#c71515',
-                    otherButtonTitle: 'Cancel',
-                    otherButtonColor: '#dedede',
-                    style: 'error',
-                    cancellable: true,
-                    subTitleStyle: {
-                        fontSize: 40
-                    }
-                });
-                console.error('Gagal menyimpan data karyawan ke database.');
-            }
+           
+              
+            
         } catch (error) {
             if (error.response && error.response.data) {
-                const errorMessage = error.response.data[0].message;
-                SweetAlert.showAlertWithOptions({
-                    title: 'Messages',
-                    subTitle: errorMessage,
-                    confirmButtonTitle: 'OK',
-                    confirmButtonColor: '#c71515',
-                    otherButtonTitle: 'Cancel',
-                    otherButtonColor: '#dedede',
-                    style: 'error',
-                    cancellable: true,
-                    subTitleStyle: {
-                        fontSize: 40
-                    }
-                });
+            
             } else {
                 console.error('Terjadi kesalahan:', error.message);
             }
@@ -264,17 +234,7 @@ const ManageDashboardUserCreate = ({ navigation }) => {
                     </View>
                 </View>
 
-                <View style={styles.formGroup}>
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            label="Email"
-                            value={formData.email}
-                            mode="outlined"
-                            style={styles.input}
-                            disabled
-                        />
-                    </View>
-                </View>
+
 
                 <TouchableOpacity style={[styles.button]} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Create</Text>
@@ -314,7 +274,7 @@ const ManageDashboardUserCreate = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#efefef',
+        backgroundColor: 'white',
     },
     dasarRed: {
         backgroundColor: '#6759ff',
@@ -324,10 +284,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 30,
-        paddingVertical: 40,
+        paddingVertical: 60,
     },
     contentWhite: {
-        backgroundColor: '#efefef',
+        backgroundColor: 'white',
         width: '100%',
         flex: 1,
         borderRadius: 30,

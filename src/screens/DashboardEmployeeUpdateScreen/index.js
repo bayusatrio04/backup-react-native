@@ -332,8 +332,8 @@ const DashboardEmployeeUpdateScreen = ({ route,navigation }) => {
                         value={formData.jenis_kelamin}
                     >
                         <View style={styles.radioContainer}>
-                            <RadioButton.Item label="Male" value="Laki-laki" />
-                            <RadioButton.Item label="Female" value="Perempuan" />
+                            <RadioButton.Item label="Male" value="L" />
+                            <RadioButton.Item label="Female" value="P" />
                         </View>
                     </RadioButton.Group>
                 </View>
@@ -359,7 +359,7 @@ const DashboardEmployeeUpdateScreen = ({ route,navigation }) => {
                                 theme={{
                                     roundness: 25,
                                 }}
-                                label="Dependents"
+                                label="Jumlah Tanggungan"
                                 onChangeText={value => handleChange('jumlah_tanggungan', value)}
                                 value={formData.jumlah_tanggungan}
                             />
@@ -454,6 +454,8 @@ const styles = StyleSheet.create({
     headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginTop:30,
+        padding:30,
     },
     headerText: {
         color: '#fff',

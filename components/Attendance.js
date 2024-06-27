@@ -131,13 +131,13 @@ const styles = StyleSheet.create({
   },
   attendanceChild: {
     top: 63,
-    left: 235,
+    left: 265,
 
     
   },
   attendanceChildOut: {
     top: 63,
-    left: 235,
+    left: 265,
 
   },
   attendanceChildText: {

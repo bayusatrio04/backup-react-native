@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import axios from 'axios'; // Import Axios library
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import axios from 'axios';
 import SweetAlert from 'react-native-sweet-alert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const EmployeeDetailScreen = ({ route, navigation }) => {
-    const { id } = route.params; // Dapatkan ID karyawan dari params navigasi
+    const { id } = route.params;
     const [employeeDetail, setEmployeeDetail] = useState(null);
-    console.log(employeeDetail);
+    const [editField, setEditField] = useState(null);
+    const [editedValue, setEditedValue] = useState('');
 
     useEffect(() => {
         fetchEmployeeDetail();
@@ -15,48 +17,71 @@ const EmployeeDetailScreen = ({ route, navigation }) => {
     const fetchEmployeeDetail = async () => {
         try {
             const token = await AsyncStorage.getItem('accessToken');
-            console.log('Access Token:', token); 
-        
             if (!token) {
-              throw new Error('Token tidak ditemukan di AsyncStorage');
+                throw new Error('Token tidak ditemukan di AsyncStorage');
             }
             const response = await axios.get(
                 `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/frontend/web/index.php?r=employees/view&id=${id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
             setEmployeeDetail(response.data);
-        // Jika ada employeeDetail.position_id, tambahkan position_name ke employeeDetail
-        if (response.data.position_id) {
-            const positionResponse = await axios.get(
-                `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/frontend/web/index.php?r=position-employees`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
 
-            // Membuat map dari data posisi untuk referensi
-            const positionsData = positionResponse.data;
+            if (response.data.position_id) {
+                const positionResponse = await axios.get(
+                    `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/frontend/web/index.php?r=position-employees`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
 
-            // Mencari posisi yang sesuai berdasarkan id
-            const position = positionsData.find(pos => pos.id === response.data.position_id);
+                const positionsData = positionResponse.data;
+                const position = positionsData.find(pos => pos.id === response.data.position_id);
 
-            // Mengupdate employeeDetail dengan position_name
-            setEmployeeDetail(prevEmployeeDetail => ({
-                ...prevEmployeeDetail,
-                position_name: position ? position.position_name : 'Unknown'
-            }));
-        }
+                setEmployeeDetail(prevEmployeeDetail => ({
+                    ...prevEmployeeDetail,
+                    position_name: position ? position.position_name : 'Unknown'
+                }));
+            }
         } catch (error) {
             console.error('Error fetching employee detail:', error);
             SweetAlert.showAlertWithOptions({
                 title: 'Error',
                 subTitle: 'Failed to fetch employee detail.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'error',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
+        }
+    };
+
+    const handleSaveField = async (field) => {
+        try {
+            const token = await AsyncStorage.getItem('accessToken');
+            if (!token) {
+                throw new Error('Token tidak ditemukan di AsyncStorage');
+            }
+            const response = await axios.put(
+                `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/frontend/web/index.php?r=employees/update&id=${id}`,
+                { [field]: editedValue },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setEmployeeDetail(prevDetail => ({
+                ...prevDetail,
+                [field]: editedValue
+            }));
+
+            setEditField(null);
+            setEditedValue('');
+
+            if (response.status === 200) {
+                console.log(`Successfully updated ${field}`);
+            }
+        } catch (error) {
+            console.error(`Error updating ${field}:`, error);
+            SweetAlert.showAlertWithOptions({
+                title: 'Error',
+                subTitle: `Failed to update ${field}.`,
                 confirmButtonTitle: 'OK',
                 confirmButtonColor: '#c71515',
                 style: 'error',
@@ -74,43 +99,50 @@ const EmployeeDetailScreen = ({ route, navigation }) => {
         );
     }
 
-    return (
-        <View style={styles.container}>
-            <Text style={styles.headerText}>Employee Detail</Text>
+    const renderEditableField = (label, field) => {
+        return (
             <View style={styles.detailContainer}>
-                <Text style={styles.label}>Name:</Text>
-                <Text style={styles.value}>
-                    {employeeDetail.nama_depan} {employeeDetail.nama_belakang}
-                </Text>
-
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{employeeDetail.email}</Text>
-
-                <Text style={styles.label}>Date of Birth:</Text>
-                <Text style={styles.value}>{employeeDetail.tanggal_lahir}</Text>
-
-                <Text style={styles.label}>Gender:</Text>
-                <Text style={styles.value}>{employeeDetail.jenis_kelamin}</Text>
-
-                <Text style={styles.label}>Marital Status:</Text>
-                <Text style={styles.value}>{employeeDetail.status_nikah}</Text>
-
-                <Text style={styles.label}>Number of Dependents:</Text>
-                <Text style={styles.value}>{employeeDetail.jumlah_tanggungan}</Text>
-
-                <Text style={styles.label}>Phone Number:</Text>
-                <Text style={styles.value}>{employeeDetail.no_telepon}</Text>
-
-                <Text style={styles.label}>Position:</Text>
-                <Text style={styles.value}>{employeeDetail.position_name}</Text>
-
-                <Text style={styles.label}>Employee Type:</Text>
-                <Text style={styles.value}>{employeeDetail.type_karyawan}</Text>
+                <Text style={styles.label}>{label}:</Text>
+                {editField === field ? (
+                    <View>
+                        <TextInput
+                            style={styles.input}
+                            value={editedValue}
+                            onChangeText={setEditedValue}
+                        />
+                        <TouchableOpacity style={styles.saveButton} onPress={() => handleSaveField(field)}>
+                            <Text style={styles.saveButtonText}>Save</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <View style={styles.valueContainer}>
+                        <Text style={styles.value}>{employeeDetail[field]}</Text>
+                        <TouchableOpacity onPress={() => { setEditField(field); setEditedValue(employeeDetail[field]); }}>
+                            <Text style={styles.editButtonText}>Edit</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
+        );
+    };
+
+    return (
+        <ScrollView style={styles.container}>
+            <Text style={styles.headerText}>Employee Detail #{employeeDetail.id}</Text>
+            {renderEditableField('Nama Depan', 'nama_depan')}
+            {renderEditableField('Nama Belakang', 'nama_belakang')}
+            {renderEditableField('Email', 'email')}
+            {renderEditableField('Gender', 'jenis_kelamin')}
+            {renderEditableField('Phone Number', 'no_telepon')}
+            {renderEditableField('Marital Status', 'status_nikah')}
+            {renderEditableField('Anaks', 'jumlah_tanggungan')}
+            {renderEditableField('Date of Birth', 'tanggal_lahir')}
+            {renderEditableField('Position', 'position_name')}
+            {renderEditableField('Employee Type', 'type_karyawan')}
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Employee Management')}>
                 <Text style={styles.buttonText}>Back</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 };
 
@@ -124,21 +156,35 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
+        alignSelf: 'center',
     },
     detailContainer: {
         backgroundColor: '#fff',
         padding: 20,
         borderRadius: 10,
         elevation: 2,
+        marginTop: 5,
     },
     label: {
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 5,
     },
+    valueContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
     value: {
         fontSize: 16,
         marginBottom: 15,
+    },
+    input: {
+        borderColor: '#ccc',
+        borderWidth: 1,
+        padding: 8,
+        marginBottom: 10,
+        borderRadius: 5,
     },
     button: {
         backgroundColor: '#6759ff',
@@ -146,8 +192,23 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         alignItems: 'center',
         marginTop: 20,
+        marginBottom: 50,
     },
     buttonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    editButtonText: {
+        color: '#6759ff',
+        fontSize: 16,
+    },
+    saveButton: {
+        backgroundColor: '#4caf50',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    saveButtonText: {
         color: '#fff',
         fontSize: 16,
     },

@@ -66,22 +66,22 @@ const DashboardEmployeeCreateScreen = ({ navigation }) => {
         setDatePickerVisible(false);
     };
 
-    const positionsButton = positions.map((position, index) => (
+    const positionsButton = positions.map((position) => (
         <TouchableOpacity
-          key={position.id}
-          style={[styles.positionButton, selectedPosition === position.position_name && styles.selectedPositionButton]}
-          onPress={() => {
-            setSelectedPosition(position.position_name);
-            handlePositionChange(position.id);
-            setModalVisible(false); // Close modal after selecting a position
-          }}
+            key={position.id}
+            style={[
+                styles.positionButton,
+                selectedPosition === position.position_name && styles.selectedPositionButton
+            ]}
+            onPress={() => {
+                setSelectedPosition(position.position_name);
+                handlePositionChange(position.id);
+                setModalVisible(false); // Close modal after selecting a position
+            }}
         >
-            <View style={styles.button}>
-                <Text style={styles.buttonText}>{position.position_name}</Text>
-            </View>
+            <Text style={styles.positionButtonText}>{position.position_name}</Text>
         </TouchableOpacity>
     ));
-
     const handlePositionChange = (positionId) => {
         setFormData({
             ...formData,
@@ -212,7 +212,7 @@ const DashboardEmployeeCreateScreen = ({ navigation }) => {
                         <View style={styles.inputContainer}>
                             <View style={styles.inputContainerStyle}>
                                 <TextInput
-                                    style={{ borderColor: 'red' }}
+                                    style={[styles.input,{  }]}
                                     mode="outlined"
                                     activeUnderlineColor="transparent"
                                     theme={{
@@ -229,7 +229,7 @@ const DashboardEmployeeCreateScreen = ({ navigation }) => {
                         <View style={styles.inputContainer}>
                             <View style={styles.inputContainerStyle}>
                                 <TextInput
-                                    style={{ borderColor: 'red' }}
+                                    style={[styles.input,{  }]}
                                     mode="outlined"
                                     activeUnderlineColor="transparent"
                                     theme={{
@@ -252,7 +252,7 @@ const DashboardEmployeeCreateScreen = ({ navigation }) => {
                                 mode="outlined"
                                 activeUnderlineColor="transparent"
                                 theme={{
-                                    roundness: 25,
+                                    roundness: 15,
                                 }}
                                 label="Email"
                                 onChangeText={value => handleChange('email', value)}
@@ -261,11 +261,11 @@ const DashboardEmployeeCreateScreen = ({ navigation }) => {
                         </View>
                     </View>
                 </View>
-                <View style={styles.formGroup}>
+                <View style={[styles.formGroup, {paddingHorizontal:10}]}>
                     <View style={styles.dateContainer}>
                         <Text style={styles.label}>Date of Birth: <Text style={styles.labelDate}>{formData.tanggal_lahir}</Text> </Text>
                         <TouchableOpacity onPress={() => setDatePickerVisible(true)}>
-                            <FontAwesomeIcon icon={faCalendar} size={30} color='#6759ff' style={{ left: 200 }} />
+                            <FontAwesomeIcon icon={faCalendar} size={30} color='#6759ff' style={{ left: 180 }} />
                         </TouchableOpacity>
                     </View>
                     <View style={styles.inputContainer}>
@@ -291,7 +291,7 @@ const DashboardEmployeeCreateScreen = ({ navigation }) => {
                                 mode="outlined"
                                 activeUnderlineColor="transparent"
                                 theme={{
-                                    roundness: 25,
+                                    roundness: 15,
                                 }}
                                 label="Gender"
                                 onChangeText={value => handleChange('jenis_kelamin', value)}
@@ -401,27 +401,23 @@ const DashboardEmployeeCreateScreen = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
             <Modal
+                visible={modalVisible}
                 animationType="slide"
                 transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                setSelectedPosition(!modalVisible);
-                }}
+                onRequestClose={() => setModalVisible(false)}
             >
-                <View style={styles.modalContainer}>
-                <View style={styles.modalContent}>
-                    <ScrollView>
-                    <View style={styles.yearButtonContainer}>
-                        {positionsButton}
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Pilih Posisi</Text>
+                            <TouchableOpacity onPress={() => setModalVisible(false)}>
+                                <FontAwesomeIcon icon={faTimesCircle} size={20} color="red" />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={styles.modalContent}>
+                            {positionsButton}
+                        </ScrollView>
                     </View>
-                    </ScrollView>
-                </View>
-                <Pressable
-                    style={styles.modalCloseButton}
-                    onPress={() => setSelectedPosition(!modalVisible)}
-                >
-                    <Text style={styles.modalCloseButtonText}>Close</Text>
-                </Pressable>
                 </View>
             </Modal>
         </ScrollView>
@@ -430,7 +426,7 @@ const DashboardEmployeeCreateScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#efefef',
+        backgroundColor: 'white',
     },
     dasarRed: {
         backgroundColor: '#6759ff',
@@ -439,11 +435,11 @@ const styles = StyleSheet.create({
     headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 30,
-        paddingVertical: 40
+        paddingHorizontal: 40,
+        paddingVertical: 60
     },
     contentWhite: {
-        backgroundColor: '#efefef',
+        backgroundColor: 'white',
         width: '100%',
         flex: 1,
         borderRadius: 30,
@@ -499,8 +495,8 @@ const styles = StyleSheet.create({
         position: 'relative',
     },
     input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
+        borderWidth: 0.2,
+        borderColor: 'white',
         borderRadius: 20,
         padding: 10,
         fontSize: 16,
@@ -510,9 +506,12 @@ const styles = StyleSheet.create({
       },
       dateContainer:{
         flexDirection:'row',
-        padding:15,
+        padding:10,
+        paddingHorizontal:20,
         backgroundColor:'#ffffff',
-        borderRadius:25
+        borderRadius:15,
+        borderWidth:1,
+        borderColor:'grey'
       },
     labelDate: {
         fontSize: 16,
@@ -538,15 +537,56 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
     },
-    selectedPositionButton: {
-        backgroundColor: '#585858',
-      },
+    // selectedPositionButton: {
+    //     backgroundColor: '#585858',
+    //   },
+    //   positionButton: {
+    //     padding: 10,
+    //     borderRadius: 5,
+    //     margin: 5,
+    //     backgroundColor: '#f0f0f0',
+    //   },
+
       positionButton: {
-        padding: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#f2f2f2',
         borderRadius: 5,
-        margin: 5,
-        backgroundColor: '#f0f0f0',
-      },
+        marginBottom: 10,
+    },
+    selectedPositionButton: {
+        backgroundColor: '#6759ff',
+    },
+    positionButtonText: {
+        fontSize: 16,
+    },
+
+
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContainer: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    modalContent: {
+        maxHeight: '80%',
+    },
 });
 
 export default DashboardEmployeeCreateScreen;

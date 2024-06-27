@@ -84,7 +84,7 @@ export const CheckInButton = () => {
             longitude: longitude.toString(),
             tanggal_absensi: formattedDate,
             waktu_absensi: formattedTime,
-            bukti_hadir: 'Bukti.jpg'
+       
           };
   
           try {

@@ -9,8 +9,8 @@ const styles = StyleSheet.create({
     header: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingTop: 20,
+      paddingHorizontal: 20,
+      paddingVertical: 50,
     },
     profileButton: {
       flexDirection: 'row',

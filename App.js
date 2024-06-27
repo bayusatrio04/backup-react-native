@@ -16,6 +16,8 @@ import AllHistoryAttendance from './src/screens/AllAttendanceScreen';
 import LetterCreationScreen from './src/screens/AllLetterScreen';
 import OvertimeLetterScreen from './src/screens/OvertimeLetterScreen';
 
+import HistoryLettersScreen from './src/screens/HistoryLettersScreen';
+import HistoryOvertimeLetter from './src/screens/HistoryLettersScreen/OvertimeLetterScreen';
 
 //Admin
 import DashboardAdminScreen from './src/screens/DashboardAdminScreen';
@@ -31,6 +33,25 @@ import DashboardEmployeeListScreen from './src/screens/DashboardEmployeeListScre
 import DashboardEmployeeUpdateScreen from './src/screens/DashboardEmployeeUpdateScreen';
 
 
+//Payroll Management
+import DashboardPayrollManagement from './src/screens/DashboardPayrollManagement';
+import DashboardPayrolls from './src/screens/DashboardPayrolls';
+import DashboardTaxScreen from './src/screens/DashboardTaxScreen';
+import DetailTaxScreen from './src/screens/DashboardTaxScreen/read';
+import DashboardTaxCreateScreen from './src/screens/DashboardTaxScreen/create';
+
+// Manage Basic Salary
+import DashboardBasicSalary from './src/screens/DashboardBasicSalary';
+import DetailBasicSalaryScreen from './src/screens/DashboardBasicSalary/read';
+import DashboardBasicSalaryCreateScreen from './src/screens/DashboardBasicSalary/create';
+
+
+
+
+//Manage Position
+import DashboardPositionScreen from './src/screens/DashboardPositionScreen';
+import DashboardPositionJobCreateScreen from './src/screens/DashboardPositionScreen/create';
+import DetailPositionScreen from './src/screens/DashboardPositionScreen/read';
 
 
 // Manage User Login
@@ -38,6 +59,27 @@ import ManageDashboardUser from './src/screens/ManageDashboardUser';
 import ManageDashboardUserCreate from './src/screens/ManageDashboardUserCreate';
 
 import UserLoginDetailScreen from './components/UserLoginDetailScreen';
+
+//Manage Overtime Screen
+import OvertimeManagementScreen from './src/screens/DashboardOvertimeScreen';
+import OvertimeDetailScreen from './components/OvertimeDetailScreen';
+import OvertimeUpdateScreen from './src/screens/DashboardOvertimeUpdateScreen';
+
+
+
+//Dashboard Absence Management Screen
+import DashboardAbsenceManagement from './src/screens/DashboardAbsenceManagement';
+import DashboardManageAbsensi from './src/screens/DashboardManageAbsensi';
+import AbsensiDetail from './src/screens/DashboardManageAbsensi/read';
+//Dashboard manage status
+import DashboardManageStatus from './src/screens/DashboardManageStatus';
+import StatusDetail from './src/screens/DashboardManageStatus/read';
+import DashboardManageStatusCreate from './src/screens/DashboardManageStatus/create';
+//Dashboard manage status
+import DashboardManageType from './src/screens/DashboardManageType';
+import TypeDetail from './src/screens/DashboardManageType/read';
+import DashboardManageTypeCreate from './src/screens/DashboardManageType/create';
+
 
 
 const Stack = createStackNavigator();
@@ -102,7 +144,7 @@ function AppNavigator() {
           name="History Salaries"
           component={HistorySalaries}
           options={{
-            headerShown:true
+            headerShown:false
           }}
         />
           <Stack.Screen
@@ -116,7 +158,21 @@ function AppNavigator() {
           name="Letter Creation"
           component={LetterCreationScreen}
           options={{
-            headerShown:true
+            headerShown:false
+          }}
+        />
+                  <Stack.Screen
+          name="History Letters"
+          component={HistoryLettersScreen}
+          options={{
+            headerShown:false
+          }}
+        />
+                          <Stack.Screen
+          name="History Overtime Letter"
+          component={HistoryOvertimeLetter}
+          options={{
+            headerShown:false
           }}
         />
         <Stack.Screen
@@ -145,7 +201,12 @@ function AppNavigator() {
             headerShown:false
           }}
         />
-            <Stack.Screen
+
+
+
+
+            {/* Employee Management Screen */}
+          <Stack.Screen
           name="Employee Management"
           component={DashboardEmployeeManagementScreen}
           options={{
@@ -181,6 +242,75 @@ function AppNavigator() {
           
         />
 
+
+        {/* Payroll Management Screen */}
+          <Stack.Screen
+          name="Payroll Management"
+          component={DashboardPayrollManagement}
+          options={{
+            headerShown:false
+          }}
+          
+        />
+             <Stack.Screen
+          name="Payrolls"
+          component={DashboardPayrolls}
+          options={{
+            headerShown:false
+          }}
+          
+        />
+          <Stack.Screen
+          name="Tax"
+          component={DashboardTaxScreen}
+          options={{
+            headerShown:false
+          }}
+          
+        />        
+        <Stack.Screen
+        name="Detail Tax"
+        component={DetailTaxScreen}
+        options={{
+          headerShown:false
+        }}
+        
+      />
+        <Stack.Screen
+        name="Create New Tax"
+        component={DashboardTaxCreateScreen}
+        options={{
+          headerShown:false
+        }}
+        
+      />
+      {/* Dashboard Basic Salary */}
+      <Stack.Screen
+          name="Manage Basic Salary"
+          component={DashboardBasicSalary}
+          options={{
+            headerShown:false
+          }}
+          
+        />
+        <Stack.Screen
+        name="Detail Basic Salary"
+        component={DetailBasicSalaryScreen}
+        options={{
+          headerShown:false
+        }}
+        
+      />
+              <Stack.Screen
+        name="Create New Basic Salary"
+        component={DashboardBasicSalaryCreateScreen}
+        options={{
+          headerShown:false
+        }}
+        
+      />
+
+
         {/* Manage Dashboard User Login */}
 
           <Stack.Screen
@@ -202,6 +332,133 @@ function AppNavigator() {
           
         />
          <Stack.Screen name="Detail User Login" component={UserLoginDetailScreen} />
+      {/* Manage Position */}
+      <Stack.Screen
+          name="Position Job"
+          component={DashboardPositionScreen}
+          options={{
+            headerShown:false
+          }}
+          />
+        <Stack.Screen
+          name="Create Position Job"
+          component={DashboardPositionJobCreateScreen}
+          options={{
+            headerShown:false
+          }}
+          />
+        <Stack.Screen
+          name="Detail Position Job"
+          component={DetailPositionScreen}
+          options={{
+            headerShown:false
+          }}
+          />
+      {/* Manage Dashboard Overtime */}
+      <Stack.Screen
+          name="Management Overtime"
+          component={OvertimeManagementScreen}
+          options={{
+            headerShown:true
+          }}
+          
+          
+        />
+        <Stack.Screen name="Overtime Detail" component={OvertimeDetailScreen} />
+
+        <Stack.Screen
+          name="Overtime Update"
+          component={OvertimeUpdateScreen}
+          options={{
+            headerShown:true
+          }}
+          
+          
+        />
+
+
+          {/* Dashboard management Absensi */}
+
+          <Stack.Screen
+          name="Absence Management"
+          component={DashboardAbsenceManagement}
+          options={{
+            headerShown:false
+          }}
+          
+          
+        />
+        {/* Manage Absensi */}
+          <Stack.Screen
+          name="Manage Absensi"
+          component={DashboardManageAbsensi}
+          options={{
+            headerShown:true
+          }}
+          
+          
+        />
+          <Stack.Screen
+          name="AbsensiDetail"
+          component={AbsensiDetail}
+          options={{
+            headerShown:true
+          }}
+          
+        />
+        {/* Manage Status */}
+        <Stack.Screen
+          name="Manage Status"
+          component={DashboardManageStatus}
+          options={{
+            headerShown:false
+          }}
+          
+          
+        />
+          <Stack.Screen
+          name="StatusDetail"
+          component={StatusDetail}
+          options={{
+            headerShown:true
+          }}
+          
+        />
+          <Stack.Screen
+          name="Create New Status"
+          component={DashboardManageStatusCreate}
+          options={{
+            headerShown:false
+          }}
+          
+        />
+
+           {/* Manage Type */}
+           <Stack.Screen
+          name="Manage Type"
+          component={DashboardManageType}
+          options={{
+            headerShown:false
+          }}
+          
+          
+        />
+          <Stack.Screen
+          name="TypeDetail"
+          component={TypeDetail}
+          options={{
+            headerShown:true
+          }}
+          
+        />
+          <Stack.Screen
+          name="Create New Type"
+          component={DashboardManageTypeCreate}
+          options={{
+            headerShown:false
+          }}
+          
+        />
 
       </Stack.Navigator>
     </NavigationContainer>

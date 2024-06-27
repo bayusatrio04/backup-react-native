@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Pressable, Alert, ActivityIndicator, Dimensions } from 'react-native';
+import {
+  View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Pressable, Alert, ActivityIndicator
+} from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DataTable, { COL_TYPES } from 'react-native-datatable-component';
 import axios from 'axios';
-import { LineChart, PieChart } from 'react-native-chart-kit';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faArrowRightFromBracket, faArrowRightToBracket } from '@fortawesome/free-solid-svg-icons';
+
 const currentMonthIndex = new Date().getMonth();
 const currentYear = new Date().getFullYear();
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -12,6 +15,7 @@ const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
 
 const API_ENDPOINT = "https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/absence/absensi-log/search";
 
+// Component
 export default function AllHistoryAttendance() {
   const [isConnected, setIsConnected] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(months[currentMonthIndex]);
@@ -38,27 +42,50 @@ export default function AllHistoryAttendance() {
       Alert.alert('No Internet Connection', 'Check your internet connection!');
     }
   }, [isConnected]);
+
   useEffect(() => {
-    fetchData(); // Panggil fetchData saat komponen di-mount
+    fetchData();
   }, []); 
+
   useEffect(() => {
     if (isSearching && selectedMonth && selectedYear) {
       fetchData();
-      setIsSearching(false); // Set isSearching kembali ke false setelah fetch data selesai
+      setIsSearching(false);
     }
   }, [isSearching, selectedMonth, selectedYear]);
 
   const handleSearch = () => {
-    setIsSearching(true); // Set isSearching menjadi true ketika tombol pencarian diklik
+    setIsSearching(true);
   };
 
   const filterDataByMonthAndYear = data => {
-    return data.items ? data.items.filter(item => {
+    if (!data.items) return [];
+
+    const filteredItems = data.items.filter(item => {
       const itemDate = new Date(item.tanggal_absensi);
       const itemMonth = itemDate.getMonth();
       const itemYear = itemDate.getFullYear();
       return itemMonth === months.indexOf(selectedMonth) && itemYear.toString() === selectedYear;
-    }) : [];
+    });
+
+    const groupedData = filteredItems.reduce((acc, item) => {
+      const date = item.tanggal_absensi;
+      if (!acc[date]) {
+        acc[date] = { checkIn: null, checkOut: null };
+      }
+      if (item.id_absensi_type === 1) {
+        acc[date].checkIn = item;
+      } else if (item.id_absensi_type === 2) {
+        acc[date].checkOut = item;
+      }
+      return acc;
+    }, {});
+
+    return Object.entries(groupedData).map(([date, { checkIn, checkOut }]) => ({
+      date,
+      checkIn,
+      checkOut
+    }));
   };
 
   const handleFetchError = error => {
@@ -88,24 +115,6 @@ export default function AllHistoryAttendance() {
     }
     setIsLoading(false);
   };
-  const renderBadge = (value) => {
-    if (value === 'On-Time') {
-      return (
-        <View style={{ backgroundColor: 'green', borderRadius: 5, paddingHorizontal: 8, paddingVertical: 4 }}>
-          <Text style={{ color: 'white' }}>{value}</Text>
-        </View>
-      );
-    } else if (value === 'Late') {
-      return (
-        <View style={{ backgroundColor: 'red', borderRadius: 5, paddingHorizontal: 8, paddingVertical: 4 }}>
-          <Text style={{ color: 'white' }}>{value}</Text>
-        </View>
-      );
-    } else {
-      return value;
-    }
-  };
-  
 
   const renderAttendanceData = () => {
     if (isLoading) {
@@ -113,22 +122,26 @@ export default function AllHistoryAttendance() {
     } else if (!filteredData || filteredData.length === 0) {
       return <Text>Data tidak ditemukan.</Text>;
     } else {
-      return (
-        <DataTable
-          data={filteredData}
-          colNames={['tanggal_absensi', 'waktu_absensi', 'latitude', 'longitude', 'keterangan']}
-          colSettings={[
-            { name: 'tanggal_absensi', type: COL_TYPES.STRING, width: '20%' },
-            { name: 'waktu_absensi', type: COL_TYPES.STRING, width: '20%' },
-            { name: 'latitude', type: COL_TYPES.STRING, width: '20%' },
-            { name: 'longitude', type: COL_TYPES.STRING, width: '20%' },
-            { name: 'keterangan', type: COL_TYPES.STRING, width: '25%', render: renderBadge },
-          ]}
-          noOfPages={2}
-          backgroundColor='#fff'
-          headerLabelStyle={{ color: 'grey', fontSize: 12 }}
-        />
-      );
+      return filteredData.map((item, index) => (
+        <View key={index} style={styles.attendanceItem}>
+          <Text style={styles.dateText}>{new Date(item.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</Text>
+          <View style={styles.timeContainer}>
+            <View style={styles.timeTextContainer}>
+              <View  style={styles.timeIcon}>
+              <FontAwesomeIcon icon={faArrowRightToBracket} size={20} color="blue" />
+              </View>
+              
+              <Text style={styles.timeText}>{item.checkIn ? item.checkIn.waktu_absensi : 'N/A'}</Text>
+            </View>
+            <View style={styles.timeTextContainer}>
+              <View  style={styles.timeIcon}>
+                <FontAwesomeIcon icon={faArrowRightFromBracket} size={20} color="blue"  />
+              </View>
+              <Text style={styles.timeText}>{item.checkOut ? item.checkOut.waktu_absensi : 'N/A'}</Text>
+            </View>
+          </View>
+        </View>
+      ));
     }
   };
 
@@ -161,144 +174,80 @@ export default function AllHistoryAttendance() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.filterContainer}>
-          <TouchableOpacity
-            style={styles.openModalButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={styles.openModalButtonText}>{selectedMonth}</Text>
-          </TouchableOpacity>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              setModalVisible(!modalVisible);
-            }}
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <ScrollView>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', flexWrap: 'wrap' }}>
-                    {monthButtons}
-                  </View>
-                </ScrollView>
-              </View>
-              <Pressable
-                style={styles.modalCloseButton}
-                onPress={() => setModalVisible(!modalVisible)}
-              >
-                <Text style={styles.modalCloseButtonText}>Close</Text>
-              </Pressable>
+        <Text style={styles.sectionHeader}>Choose Month</Text>
+        <TouchableOpacity
+          style={styles.openModalButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.openModalButtonText}>{selectedMonth}</Text>
+        </TouchableOpacity>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <ScrollView>
+                {monthButtons}
+              </ScrollView>
             </View>
-          </Modal>
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={styles.modalCloseButtonText}>Close</Text>
+            </Pressable>
+          </View>
+        </Modal>
 
-          <TouchableOpacity
-            style={styles.openModalButton}
-            onPress={() => setYearModalVisible(true)}
-          >
-            <Text style={styles.openModalButtonText}>{selectedYear}</Text>
-          </TouchableOpacity>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={yearModalVisible}
-            onRequestClose={() => {
-              setYearModalVisible(!yearModalVisible);
-            }}
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <ScrollView>
-                  <View style={styles.yearButtonContainer}>
-                    {yearButtons}
-                  </View>
-                </ScrollView>
-              </View>
-              <Pressable
-                style={styles.modalCloseButton}
-                onPress={() => setYearModalVisible(!yearModalVisible)}
-              >
-                <Text style={styles.modalCloseButtonText}>Close</Text>
-              </Pressable>
+        <Text style={[styles.sectionHeader, { marginTop: 10 }]}>Choose Year</Text>
+        <TouchableOpacity
+          style={styles.openModalButton}
+          onPress={() => setYearModalVisible(true)}
+        >
+          <Text style={styles.openModalButtonText}>{selectedYear}</Text>
+        </TouchableOpacity>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={yearModalVisible}
+          onRequestClose={() => {
+            setYearModalVisible(!yearModalVisible);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <ScrollView>
+                {yearButtons}
+              </ScrollView>
             </View>
-          </Modal>
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setYearModalVisible(!yearModalVisible)}
+            >
+              <Text style={styles.modalCloseButtonText}>Close</Text>
+            </Pressable>
+          </View>
+        </Modal>
 
-          <TouchableOpacity
-            style={styles.searchButton}
-            onPress={handleSearch}
-          >
-            <Text style={styles.searchButtonText}>Search</Text>
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView style={styles.tableContainer}>
-          {renderAttendanceData()}
-        </ScrollView>
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={handleSearch}
+        >
+          <Text style={styles.searchButtonText}>Search</Text>
+        </TouchableOpacity>
       </View>
+
+      <ScrollView style={styles.tableContainer}>
+        {renderAttendanceData()}
+      </ScrollView>
+
       <View style={styles.totalDataContainer}>
-        <Text style={styles.totalDataText}>Total data: </Text>
-        <Text style={styles.totalDataText}>{totalData}</Text>
-      </View>
-      <View>
-      {/* <PieChart
-    data={
-        [
-        {
-            name: "Jawa Barat",
-            population: 48.0,
-            color: "rgba(131, 167, 234, 1)",
-            legendFontColor: "#000000",
-            legendFontSize: 11
-        },
-        {
-            name: "Jawa Timur",
-            population: 39.2,
-            color: "red",
-            legendFontColor: "#000000",
-            legendFontSize: 11
-        },
-        {
-            name: "Jawa Tengah",
-            population: 34.2,
-            color: "yellow",
-            legendFontColor: "#000000",
-            legendFontSize: 11
-        },
-        {
-            name: "Sumatera Utara",
-            population: 14.2,
-            color: "orange",
-            legendFontColor: "#000000",
-            legendFontSize: 11
-        },
-        {
-            name: "Banten",
-            population: 12.4,
-            color: "green",
-            legendFontColor: "#000000",
-            legendFontSize: 11
-        }
-        ]
-    }
-    width={Dimensions.get("window").width - 50} // from react-native
-    height={220}
-    chartConfig={{
-        color: (opacity = 1) => `#000000`,
-        labelColor: (opacity = 1) => `#000000`,
-        style: {
-            borderRadius: 16
-        }
-    }}
-    backgroundColor="#ffffff"
-    accessor="population"
-    paddingLeft="15"
-    absolute
-    style={{
-        marginVertical: 8,
-        borderRadius: 16
-    }}
-/> */}
+        <Text style={styles.totalDataText}>Total Data: {totalData}</Text>
       </View>
     </View>
   );
@@ -307,129 +256,132 @@ export default function AllHistoryAttendance() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#f5f5f5',
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   content: {
-    width: '90%',
-    alignItems: 'center',
-    paddingVertical: 20,
+    flex: 0.7,
   },
-  filterContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   openModalButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#ff3300',
-    borderRadius: 8,
-    marginHorizontal: 10,
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    marginBottom: 10,
+   
   },
   openModalButtonText: {
     fontSize: 16,
-    color: '#ffffff',
+    fontWeight:'bold',
+     alignSelf:'center'
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingHorizontal: 20,
   },
   modalContent: {
     backgroundColor: '#fff',
-    padding: 60,
     borderRadius: 10,
-    width: '80%',
-    maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    padding: 20,
+    maxHeight: 400,
   },
   modalCloseButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#ff0000',
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#2196f3',
     borderRadius: 5,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  monthButtonText: {
-    backgroundColor: 'white',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
   },
   modalCloseButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalCloseButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
+    color: '#fff',
+    fontSize: 16,
   },
   monthButton: {
+    marginVertical: 5,
     padding: 10,
+    backgroundColor: '#f5f5f5',
     borderRadius: 5,
-    margin: 5,
-    backgroundColor: '#f0f0f0',
+    minWidth: 80,
+    alignItems: 'center',
   },
   selectedMonthButton: {
-    backgroundColor: '#ff3620',
+    backgroundColor: '#2196f3',
   },
   monthButtonText: {
     fontSize: 16,
   },
   yearButton: {
+    marginVertical: 5,
     padding: 10,
+    backgroundColor: '#f5f5f5',
     borderRadius: 5,
-    margin: 5,
-    backgroundColor: '#f0f0f0',
+    minWidth: 60,
+    alignItems: 'center',
   },
   selectedYearButton: {
-    backgroundColor: '#f32121',
+    backgroundColor: '#2196f3',
   },
   yearButtonText: {
     fontSize: 16,
-  },
-  yearButtonContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-evenly',
+    alignSelf:'center'
   },
   searchButton: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    padding: 10,
+    backgroundColor: '#2196f3',
+    borderRadius: 5,
+    marginTop: 20,
   },
   searchButtonText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 16,
+    alignSelf:'center'
   },
   tableContainer: {
-    width: '100%',
-    marginTop: 20,
+    flex: 1,
+    marginTop: 10,
+  },
+  attendanceItem: {
+    marginBottom: 10,
+    padding: 15,
+    borderLeftWidth:3,
+    borderColor: '#2196f3',
+    borderRadius: 20,
+    backgroundColor:'white'
+  },
+  dateText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  timeTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeIcon: {
+    marginRight: 10,
+    backgroundColor: 'rgba(207, 218, 255, 0.3)',
+    padding: 10,
+    borderRadius: 5,
+  },
+  timeText: {
+    fontSize: 16,
   },
   totalDataContainer: {
-    flexDirection: 'row',
-    marginTop: 20,
+    alignItems: 'flex-end',
+    marginVertical: 10,
   },
   totalDataText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

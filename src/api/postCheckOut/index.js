@@ -100,7 +100,7 @@ export const CheckOutButton = () => {
             longitude: longitude.toString(),
             tanggal_absensi: formattedDate,
             waktu_absensi: formattedTime,
-            bukti_hadir: 'Bukti.jpg'
+     
           };
 
           const response = await axios.post(
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#ef3535ff',
     borderRadius: 10,
-    width: 85,
+    width: 90,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
