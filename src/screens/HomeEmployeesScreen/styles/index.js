@@ -43,12 +43,12 @@ export default StyleSheet.create({
     padding: wp(5),
   },
   goodAfternoon: {
-    fontSize: hp(2.5),
+    fontSize: hp(2),
     fontWeight: 'bold',
     color:'white'
   },
   namaLengkap: {
-    fontSize: hp(2),
+    fontSize: hp(3),
  color:'white'
   },
   menuContainer: {
@@ -59,10 +59,11 @@ export default StyleSheet.create({
     marginBottom: hp(4.5),
   },
   buttonDashboard: {
-    backgroundColor: '#090979',
+    backgroundColor: '#900',
     padding: hp(2),
     borderRadius: wp(3),
     alignItems: 'center',
+    top:hp(2),
   },
   disconnected: {
     color: 'red',

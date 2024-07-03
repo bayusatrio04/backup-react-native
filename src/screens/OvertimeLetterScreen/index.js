@@ -5,50 +5,75 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import SweetAlert from 'react-native-sweet-alert';
-const OvertimeLetterScreen = ({navigation}) => {
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+
+const OvertimeLetterScreen = ({ navigation }) => {
     const [overtimeDate, setOvertimeDate] = useState(dayjs());
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [totalHours, setTotalHours] = useState('');
     const [overtimeReason, setOvertimeReason] = useState('');
+    const [startTimeOpen, setStartTimeOpen] = useState(false);
+    const [selectedTime, setSelectedTime] = useState('');
+    const [endTimeOpen, setEndTimeOpen] = useState(false);
+    const [selectedEndTime, setSelectedEndTime] = useState('');
+
+    const showStartTime = () => setStartTimeOpen(true);
+    const hideStartTime = () => setStartTimeOpen(false);
+    const handleConfirmTime = (date) => {
+        setSelectedTime(dayjs(date).format('HH:mm'));
+        hideStartTime();
+    };
+
+    const showEndTime = () => setEndTimeOpen(true);
+    const hideEndTime = () => setEndTimeOpen(false);
+    const handleConfirmEndTime = (date) => {
+        setSelectedEndTime(dayjs(date).format('HH:mm'));
+        hideEndTime();
+    };
 
     useEffect(() => {
-        if (startTime && endTime) {
-            const [startHour, startMinute] = startTime.split(':').map(Number);
-            const [endHour, endMinute] = endTime.split(':').map(Number);
-
+        if (selectedTime && selectedEndTime) {
+            const [startHour, startMinute] = selectedTime.split(':').map(Number);
+            const [endHour, endMinute] = selectedEndTime.split(':').map(Number);
             const startTotalMinutes = startHour * 60 + startMinute;
             const endTotalMinutes = endHour * 60 + endMinute;
 
             if (endTotalMinutes > startTotalMinutes) {
                 const durationMinutes = endTotalMinutes - startTotalMinutes;
                 const durationHours = durationMinutes / 60;
-                setTotalHours(durationHours.toFixed(2)); // Format to 2 decimal places
+                setTotalHours(durationHours.toFixed(2));
             } else {
                 setTotalHours('');
             }
         }
-    }, [startTime, endTime]);
+    }, [selectedTime, selectedEndTime]);
 
     const handleSubmit = async () => {
         const formattedDate = dayjs(overtimeDate).format('YYYY-MM-DD');
+        if (!overtimeDate || !selectedTime || !selectedEndTime || !overtimeReason) {
+            console.log('overtimeDate:', formattedDate);
+            console.log('startTime:', selectedTime);
+            console.log('endTime:', selectedEndTime);
+            console.log('overtimeReason:', overtimeReason);
+            Alert.alert('Error', 'Isi Formulir Lembur dengan benar');
+            return;
+        }
 
         const payload = {
             overtime_date: formattedDate,
-            start_time: startTime,
-            end_time: endTime,
+            start_time: selectedTime,
+            end_time: selectedEndTime,
             total_hours: totalHours,
             overtime_reason: overtimeReason,
             status: "Pending",
         };
 
-        console.log('Payload:', payload);
-
         try {
-         
             const token = await AsyncStorage.getItem('accessToken');
             if (!token) {
                 Alert.alert('Token Tidak ada');
+                return;
             }
             const response = await axios.post(
                 'https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/absence/overtime/create',
@@ -61,7 +86,6 @@ const OvertimeLetterScreen = ({navigation}) => {
                 }
             );
 
-            console.log('Response:', response.data);
             SweetAlert.showAlertWithOptions({
                 title: 'Messages',
                 subTitle: 'Overtime request submitted successfully!',
@@ -72,11 +96,11 @@ const OvertimeLetterScreen = ({navigation}) => {
                 style: 'success',
                 cancellable: true,
                 subTitleStyle: {
-                  fontSize: 40
+                    fontSize: 40
                 }
-              });
-              navigation.replace('Home');
-              navigation.replace('Create Overtime Letter');
+            });
+            navigation.replace('Home');
+            navigation.replace('Create Overtime Letter');
         } catch (error) {
             console.error('Error submitting overtime request:', error);
             Alert.alert('Error', 'Failed to submit overtime request. Please try again.');
@@ -85,34 +109,53 @@ const OvertimeLetterScreen = ({navigation}) => {
 
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.header}>Overtime Request</Text>
             <DateTimePicker
                 mode="single"
                 date={overtimeDate}
                 onChange={(params) => setOvertimeDate(params.date)}
+                headerButtonColor="#900"
+                headerButtonsPosition="#900"
+                selectedItemColor="#900"
+                yearContainerStyle='red'
             />
-            <TextInput
-                style={styles.input}
-                placeholder="Start Time (HH:mm)"
-                value={startTime}
-                onChangeText={setStartTime}
+            <TouchableOpacity onPress={showStartTime}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Pilih Jam Mulai nya (HH:mm)"
+                    value={selectedTime}
+                    editable={false}
+                />
+            </TouchableOpacity>
+            <DateTimePickerModal
+                isVisible={startTimeOpen}
+                mode="time"
+                onConfirm={handleConfirmTime}
+                onCancel={hideStartTime}
             />
-            <TextInput
-                style={styles.input}
-                placeholder="End Time (HH:mm)"
-                value={endTime}
-                onChangeText={setEndTime}
+            <TouchableOpacity onPress={showEndTime}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Pilih Jam Berakhir nya (HH:mm)"
+                    value={selectedEndTime}
+                    editable={false}
+                />
+            </TouchableOpacity>
+            <DateTimePickerModal
+                isVisible={endTimeOpen}
+                mode="time"
+                onConfirm={handleConfirmEndTime}
+                onCancel={hideEndTime}
             />
             <TextInput
                 style={styles.input}
                 placeholder="Total Hours"
                 value={totalHours}
-                editable={false} // Disable input
+                editable={false}
             />
             <TextInput
                 style={styles.input}
-                placeholder="Overtime Reason"
-                multiline={true}
+                placeholder="Alasan Lembur"
+                multiline
                 numberOfLines={4}
                 value={overtimeReason}
                 onChangeText={setOvertimeReason}
@@ -130,24 +173,19 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#ffffff',
     },
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 24,
-        textAlign: 'center',
-    },
     input: {
+        marginTop: 20,
         borderWidth: 1,
         borderColor: '#ccc',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 16,
+        borderRadius: 20,
+        padding: 10,
     },
     button: {
+        marginTop: 10,
         marginBottom: 30,
-        backgroundColor: '#E1AEFF',
-        borderRadius: 8,
-        padding: 16,
+        backgroundColor: '#900',
+        borderRadius: 10,
+        padding: 10,
         alignItems: 'center',
     },
     buttonText: {

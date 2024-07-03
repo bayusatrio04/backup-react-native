@@ -8,14 +8,14 @@ import { faPenToSquare, faSave } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip } from 'react-native-paper';
 const TypeDetail = ({ route, navigation }) => {
     const { id } = route.params;
-    const [status, setType] = useState(null);
+    const [type, setType] = useState(null);
     const [editModeType, setEditModeType] = useState(false);
     const [newType, setNewType] = useState('');
     const [editModeDesc, setEditModeDesc] = useState(false);
     const [newDesc, setNewDesc] = useState('');
     
 
-    const fetchstatus = async () => {
+    const fetchType = async () => {
         try {
             const token = await AsyncStorage.getItem('accessToken');
             console.log('Access Token:', token);
@@ -39,7 +39,7 @@ const TypeDetail = ({ route, navigation }) => {
             console.error('Error fetching Type detail:', error);
             SweetAlert.showAlertWithOptions({
                 title: 'Error',
-                subTitle: 'Failed to fetch user login detail.',
+                subTitle: 'Failed to fetch Type detail.',
                 confirmButtonTitle: 'OK',
                 confirmButtonColor: '#c71515',
                 style: 'error',
@@ -71,19 +71,19 @@ const TypeDetail = ({ route, navigation }) => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            console.log('Type id:', status.data.id);
+            console.log('Type id:', type.data.id);
             const payload = {
                 type: newType // Pastikan payload hanya berisi username yang baru
             };
     
-            console.log('type id:', status.data.id);
+            console.log('type id:', type.data.id);
             const response = await axios.put(
-                `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/typeabsence/type-absence/update?id=${status.data.id}`,
+                `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/typeabsence/type-absence/update?id=${type.data.id}`,
                 payload,
                 config
             );
 
-            if(response.status){
+            if(response.ok){
                 console.log('Berhasil Update Type');
             }
  
@@ -91,7 +91,15 @@ const TypeDetail = ({ route, navigation }) => {
                 ...prevDetail,
                 data: { ...prevDetail.data, type: newType } // Perbaiki update username di sini
             }));
-
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Berhasil mengubah data.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
             setEditModeType(false); 
         } catch (error) {
             console.error('Error saving type:', error);
@@ -123,19 +131,19 @@ const TypeDetail = ({ route, navigation }) => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            console.log('desc id:', status.data.id);
+            console.log('desc id:', type.data.id);
             const payload = {
                 description: newDesc // Pastikan payload hanya berisi username yang baru
             };
     
-            console.log('status id:', status.data.id);
+            console.log('type id:', type.data.id);
             const response = await axios.put(
-                `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/typeabsence/type-absence/update?id=${status.data.id}`,
+                `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/typeabsence/type-absence/update?id=${type.data.id}`,
                 payload,
                 config
             );
 
-            if(response.status){
+            if(response.ok){
                 console.log('Berhasil Update description');
             }
             // Simulasikan permintaan update ke backend
@@ -144,7 +152,15 @@ const TypeDetail = ({ route, navigation }) => {
                 ...prevDetail,
                 data: { ...prevDetail.data, description: newDesc } // Perbaiki update username di sini
             }));
-
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Berhasil mengubah data.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
             setEditModeDesc(false); 
         } catch (error) {
             console.error('Error saving description:', error);
@@ -161,10 +177,10 @@ const TypeDetail = ({ route, navigation }) => {
     };
 
     useEffect(() => {
-        fetchstatus();
+        fetchType();
     }, []);
 
-    if (!status) {
+    if (!type) {
         return (
             <View style={styles.container}>
                 <Text>Loading...</Text>
@@ -174,9 +190,9 @@ const TypeDetail = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.headerText}>Status Detail #{status.data.id}</Text>
+            <Text style={styles.headerText}>Type Detail #{type.data.id}</Text>
             <View style={styles.detailContainer}>
-            <Text style={styles.label}>Status:</Text>
+            <Text style={styles.label}>type:</Text>
                 {editModeType ?(
                     <View style={styles.editContainer}>
                         <TextInput
@@ -193,7 +209,7 @@ const TypeDetail = ({ route, navigation }) => {
                 ):(
                     <View style={styles.valueContainer}>
 
-                        <Text style={styles.value}>{status.data.type}</Text>
+                        <Text style={styles.value}>{type.data.type}</Text>
                         <TouchableOpacity onPress={handleEditType} style={styles.icon}>
                             <FontAwesomeIcon icon={faPenToSquare} size={20} color="#6759ff" />
                         </TouchableOpacity>
@@ -222,7 +238,7 @@ const TypeDetail = ({ route, navigation }) => {
                 ):(
                     <View style={styles.valueContainer}>
 
-                        <Text style={styles.value}>{status.data.description}</Text>
+                        <Text style={styles.value}>{type.data.description}</Text>
                         <TouchableOpacity onPress={handleEditDesc} style={styles.icon}>
                             <FontAwesomeIcon icon={faPenToSquare} size={20} color="#6759ff" />
                         </TouchableOpacity>

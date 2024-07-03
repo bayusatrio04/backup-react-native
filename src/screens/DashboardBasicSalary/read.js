@@ -65,48 +65,6 @@ const DetailBasicSalaryScreen = ({ route, navigation }) => {
     };
 
 
-    const handleEditMasaBerlaku = () => {
-        setEditModeMasaBerlaku(true); 
-    };
-    const handleSaveMasaBerlaku = async () => {
-        try {
-            const token = await AsyncStorage.getItem('accessToken');
-            console.log('Access Token:', token);
-
-            if (!token) {
-                throw new Error('Token tidak ditemukan di AsyncStorage');
-            }
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            };
-            const response = await axios.put(
-                `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/salary/manage-tax/update?id=${basicSalary.id}`,
-                { masa_berlaku: newMasaBerlaku }, // Ganti ini dengan payload yang sesuai
-                config
-            );
-            // Simulasikan permintaan update ke backend
-            // Untuk pengujian ini, langsung update ke state userDetail
-            setBasicSalary((prevDetail) => ({
-                ...prevDetail,
-                masa_berlaku: newMasaBerlaku,
-            }));
-
-            setEditModeMasaBerlaku(false); // Nonaktifkan mode edit setelah berhasil disimpan
-        } catch (error) {
-            console.error('Error saving Masa Berlaku:', error);
-            SweetAlert.showAlertWithOptions({
-                title: 'Error',
-                subTitle: 'Failed to save Masa Berlaku.',
-                confirmButtonTitle: 'OK',
-                confirmButtonColor: '#c71515',
-                style: 'error',
-                cancellable: true,
-                subTitleStyle: { fontSize: 16 },
-            });
-        }
-    };
     const handleEditGajiPokok = () => {
         setEditModeGajiPokok(true); // Aktifkan mode edit untuk nama posisi
     };
@@ -135,7 +93,15 @@ const DetailBasicSalaryScreen = ({ route, navigation }) => {
                 ...prevDetail,
                 gaji_pokok: newGajiPokok,
             }));
-
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Berhasil mengubah data.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
             setEditModeGajiPokok(false); // Nonaktifkan mode edit setelah berhasil disimpan
         } catch (error) {
             console.error('Error saving Gaji Pokok:', error);
@@ -247,7 +213,7 @@ const styles = StyleSheet.create({
         maxWidth: '90%',
     },
     backButton: {
-        backgroundColor: '#6759ff',
+        backgroundColor: '#900',
         padding: 15,
         borderRadius: 5,
         alignItems: 'center',

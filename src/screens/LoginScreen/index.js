@@ -5,11 +5,13 @@ import CheckBox from '@react-native-community/checkbox';
 import auth_api from '../../api/getAuth/index';
 import SweetAlert from 'react-native-sweet-alert';
 import NetInfo from '@react-native-community/netinfo';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faArrowLeft, faSearch  } from '@fortawesome/free-solid-svg-icons';
 const LoginScreen = ({ navigation }) => {
   const [isConnected, setIsConnected] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isKeepSignedIn, setIsKeepSignedIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
@@ -84,49 +86,81 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  const goChoose = () => {
+    navigation.navigate('LoginOrRegister');
+  };
 
+  const showForgotPasswordModal = () => {
+    setModalVisible(true);
+  };
+
+  const closeForgotPasswordModal = () => {
+    setModalVisible(false);
+  };
 
   return (
     <View style={styles.container}>
+
         <Image
         source={require('../../assets/images/logo_djipay_v2.png')}
         style={styles.logo}
       />
-      <Text style={styles.title}>Welcome Back !</Text>
-      <Text style={styles.text}>Stay signed in with your account to make searching easier</Text>
-      <Text  style={styles.textUsername}>Username</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your username"
-        placeholderTextColor="#949494"
-        value={username}
-        onChangeText={text => setUsername(text)}
-      />
-       <Text  style={styles.textUsername}>Password</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your password"
-        placeholderTextColor="#949494"
-        secureTextEntry={true}
-        value={password}
-        onChangeText={text => setPassword(text)}
-      />
-         <View style={styles.optionsContainer}>
-            <View style={styles.checkboxContainer}>
-              <CheckBox
-                value={isKeepSignedIn}
-                onValueChange={setIsKeepSignedIn}
-              />
-              <Text style={styles.checkboxText}>Keep me signed in</Text>
-            </View>
-            <TouchableOpacity >
-              <Text style={styles.textForgot}>Forgot Password?</Text>
+      <Text style={styles.title}>Welcome!</Text>
+      <Text style={styles.text}>Stay signed in with your account</Text>
+      <View style={styles.loginContainer}>
+        <Text style={styles.textUsername}>Username</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your username"
+          placeholderTextColor="#949494"
+          value={username}
+          onChangeText={text => setUsername(text)}
+        />
+        <Text style={styles.textUsername}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          placeholderTextColor="#949494"
+
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={text => setPassword(text)}
+        />
+        <View style={styles.optionsContainer}>
+          <View style={styles.checkboxContainer}>
+            <CheckBox
+              value={showPassword}
+              onValueChange={setShowPassword}
+            />
+            <Text style={styles.checkboxText}>Show Password</Text>
+          </View>
+          <TouchableOpacity onPress={showForgotPasswordModal} >
+            <Text style={styles.textForgot}>Forgot Password?</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoading}>
+          <Text style={styles.buttonText}>{isLoading ? 'Loading...' : 'Sign In'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={goChoose}>
+          <Text style={styles.backText}>Kembali</Text>
+        </TouchableOpacity>
+      </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeForgotPasswordModal}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Pemberitahuan</Text>
+            <Text style={styles.modalDescription}>Jika lupa password, hubungi <Text style={{fontWeight:'bold'}}>General Manager</Text></Text>
+            <TouchableOpacity onPress={closeForgotPasswordModal} style={styles.modalCloseButton}>
+              <Text style={styles.modalCloseButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoading}>
-            <Text style={styles.buttonText}>{isLoading ? 'Loading...' : 'Sign In'}</Text>
-          </TouchableOpacity>
-      {/* <Button title="Show Alert" onPress={showAlert} /> */}
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -140,6 +174,7 @@ const styles = StyleSheet.create({
     paddingVertical:50,
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingVertical:150
   },
   title: {
     fontSize: 24,
@@ -154,13 +189,19 @@ const styles = StyleSheet.create({
     textAlign:'center',
     paddingHorizontal:60
   },
+  loginContainer: {
+    width: '90%',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   textUsername: {
     fontSize: 15,
-    marginBottom: 20,
-    color:'#2c2c2c',
-    alignSelf: 'flex-start', // Mengatur teks ke kiri
-    textAlign: 'left',
-
+    marginBottom: 10,
+    color: '#2c2c2c',
+    alignSelf: 'flex-start',
   },
   input: {
     width: '100%',
@@ -170,7 +211,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 20,
-    color:"#da4a4a"
+    color: "#da4a4a",
   },
   optionsContainer: {
     flexDirection: 'row',
@@ -186,26 +227,41 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     color: '#2c2c2c',
   },
+  textForgot: {
+    fontSize: 12,
+    color: '#EC353A',
+    textDecorationLine: 'underline',
+  },
   button: {
+    width: '100%',
     backgroundColor: '#EC353A',
     paddingVertical: 15,
-    paddingHorizontal: 130,
     borderRadius: 8,
-    marginTop:20
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
     fontSize: 16,
     color: '#fff',
     fontWeight: 'bold',
   },
-    textForgot: {
-    
-    fontSize: 12,
-    color: '#EC353A',
-    fontWeight: 'relgular',
-    alignSelf:'flex-end',
-    bottom:5,
-    textDecorationLine:'underline'
+  jobdesLogo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  iconContainer: {
+    marginRight: 10,
+  },
+  dji: {
+    color: "#000",
+    fontSize: 20,
+    fontWeight: '900',
+  },
+  pay: {
+    color: "#ec353a",
+    fontSize: 20,
+    fontWeight: '900',
   },
 
   logo: {
@@ -214,5 +270,47 @@ const styles = StyleSheet.create({
     resizeMode: 'contain', 
   },
 
-  
+  backText: {
+    color: '#EC353A',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
+    marginTop: 20,
+  },
+
+    // Modal styles
+    modalBackground: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContainer: {
+      backgroundColor: '#fff',
+      borderRadius: 10,
+      padding: 20,
+      width: '80%',
+      alignItems: 'center',
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 10,
+    },
+    modalDescription: {
+      fontSize: 16,
+      textAlign: 'center',
+      marginBottom: 20,
+    },
+    modalCloseButton: {
+      backgroundColor: '#EC353A',
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 8,
+    },
+    modalCloseButtonText: {
+      fontSize: 16,
+      color: '#fff',
+      fontWeight: 'bold',
+    },
 });

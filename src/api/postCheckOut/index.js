@@ -69,8 +69,12 @@ export const CheckOutButton = () => {
       if (hasCheckedOutToday) { // Tambahkan pengecekan apakah pengguna sudah checkout hari ini
         Alert.alert('Peringatan', 'Anda sudah melakukan CheckOut hari ini');
       } else {  
-        // Lakukan proses checkout jika belum checkout hari ini
+        setTimeout(() => {
+          setLoading(false);
+          navigation.navigate('Loading');
+        }, 5000);
         performCheckout();
+        navigation.replace('Home');
       }
     } catch (error) {
       console.error('Gagal melakukan check Out:', error.message);

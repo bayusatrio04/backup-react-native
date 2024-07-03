@@ -10,26 +10,12 @@ import moment from 'moment';
 
 const DashboardManageTypeCreate = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [salaries, setSalaries] = useState([]);
-    const [selectedSalary, setSelectedSalary] = useState(null);
 
-    useEffect(() => {
-        fetchSalaries();
-    }, []);
 
-    const fetchSalaries = async () => {
-        try {
-            const response = await axios.get(
-                'https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/frontend/web/index.php?r=position-employees-salaries'
-            );
-            setSalaries(response.data);
-        } catch (error) {
-            console.error('Error fetching salaries:', error);
-        }
-    };
+   
 
     const [formData, setFormData] = useState({
-        status: '',
+        type: '',
         description: '',
         created_at: '',
         updated_at: '',
@@ -78,7 +64,7 @@ const DashboardManageTypeCreate = ({ navigation }) => {
 
         try {
             const response = await axios.post(
-                'https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/frontend/web/index.php?r=absensi-status/create',
+                'https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/frontend/web/index.php?r=absensi-type/create',
                 updatedFormData,
                 {
                     headers: {
@@ -90,11 +76,10 @@ const DashboardManageTypeCreate = ({ navigation }) => {
 
             console.log('Server Response:', response.data);
 
-            if (response.status) {
-                
+        
                 SweetAlert.showAlertWithOptions({
                     title: 'Messages',
-                    subTitle: 'Berhasil Menambah Data Status',
+                    subTitle: 'Berhasil Menambah Data Type',
                     confirmButtonTitle: 'OK',
                     confirmButtonColor: '#c71515',
                     otherButtonTitle: 'Cancel',
@@ -105,33 +90,14 @@ const DashboardManageTypeCreate = ({ navigation }) => {
                       fontSize: 40
                     }
                   });
-                console.log('Data Status berhasil disimpan ke database!');
-                setFormData({
-                    status: '',
-                    description: '',
-                    
-                });
+                console.log('Data Type berhasil disimpan ke database!');
+    
                 navigation.navigate('Absence Management');
-                navigation.navigate('Manage Status');
-            } else {
-                SweetAlert.showAlertWithOptions({
-                    title: 'Messages',
-                    subTitle: 'Gagal menyimpan data Status ke database.',
-                    confirmButtonTitle: 'OK',
-                    confirmButtonColor: '#c71515',
-                    otherButtonTitle: 'Cancel',
-                    otherButtonColor: '#dedede',
-                    style: 'error',
-                    cancellable: true,
-                    subTitleStyle: {
-                      fontSize: 40
-                    }
-                  });
-                console.error('Gagal menyimpan data Status ke database.');
-            }
+                navigation.navigate('Manage Type');
+           
         } catch (error) {
             if (error.response && error.response.data) {
-                const errorMessage = error.response.data[0].message;
+                const errorMessage = error.response.data.message;
                 SweetAlert.showAlertWithOptions({
                     title: 'Messages',
                     subTitle: errorMessage,
@@ -151,9 +117,9 @@ const DashboardManageTypeCreate = ({ navigation }) => {
         }
     };
 
-    const goToTax = () => {
-        navigation.navigate('Tax');
-        console.log('Tax Screen');
+    const goToAbsenceManagement = () => {
+        navigation.navigate('Absence Management');
+        console.log('Absence Management Screen');
     };
     const formatCurrency = (amount) => {
         if (typeof amount === 'string') {
@@ -172,10 +138,10 @@ const DashboardManageTypeCreate = ({ navigation }) => {
         <ScrollView style={styles.container}>
             <View style={styles.dasarRed}>
                 <View style={styles.headerContainer}>
-                    <TouchableOpacity onPress={goToTax}>
+                    <TouchableOpacity onPress={goToAbsenceManagement}>
                         <FontAwesomeIcon icon={faArrowLeft} size={20} color="#fff" />
                     </TouchableOpacity>
-                    <Text style={styles.headerText}>Create New Status</Text>
+                    <Text style={styles.headerText}>Create New Type</Text>
                 </View>
             </View>
 
@@ -191,9 +157,9 @@ const DashboardManageTypeCreate = ({ navigation }) => {
                                 theme={{
                                     roundness: 20,
                                 }}
-                                label="Masukkan Status (ex: Approved)"
-                                onChangeText={value => handleChange('status', value)}
-                                value={formData.status}
+                                label="Masukkan type (ex: Izin-Sebentar)"
+                                onChangeText={value => handleChange('type', value)}
+                                value={formData.type}
                             />
                         </View>
                     </View>
@@ -209,7 +175,7 @@ const DashboardManageTypeCreate = ({ navigation }) => {
                                 theme={{
                                     roundness: 20,
                                 }}
-                                label="Deskripsi? (ex:Bertanggungjawab sebagai)"
+                                label="Deskripsi? (ex:Beristirahat sebentar)"
                                 onChangeText={value => handleChange('description', value)}
                                 value={formData.description}
                             />
@@ -220,7 +186,7 @@ const DashboardManageTypeCreate = ({ navigation }) => {
 
 
                 <TouchableOpacity style={[styles.button]} onPress={handleSubmit}>
-                    <Text style={styles.buttonText}>Create New Status</Text>
+                    <Text style={styles.buttonText}>Create New Type</Text>
                 </TouchableOpacity>
             </View>
 

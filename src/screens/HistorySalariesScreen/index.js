@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, Modal, TouchableOpacity, Alert, TextI
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faSearch  } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faChevronLeft, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 export default function HistorySalaries({ navigation }) {
   const currentYear = new Date().getFullYear();
@@ -14,27 +14,28 @@ export default function HistorySalaries({ navigation }) {
   const [position, setPosition] = useState('');
   const [year, setYear] = useState('');
   const [messages, setMessages] = useState('');
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
 
   const goHome = () => {
     navigation.navigate('Home');
   };
+  const openDetailModal = (item) => {
+    setSelectedItem(item);
+    setDetailModalVisible(true);
+  };
+
+  const closeDetailModal = () => {
+    setDetailModalVisible(false);
+  };
+
 
   useEffect(() => {
     fetchData(selectedYear);
   }, [selectedYear]);
 
-  const openYearModal = () => {
-    setYearModalVisible(true);
-  };
 
-  const closeYearModal = () => {
-    setYearModalVisible(false);
-  };
-
-  const handleYearSelect = (year) => {
-    setSelectedYear(year.toString());
-    setYearModalVisible(false);
-  };
 
   const fetchData = async (year) => {
     try {
@@ -69,6 +70,7 @@ export default function HistorySalaries({ navigation }) {
       currency: 'IDR'
     }).format(earnings).replace(',00', '');
   };
+
   const handleYearChange = (text) => {
     if (/^\d*$/.test(text) && text.length <= 4) {
       setSelectedYear(text);
@@ -77,42 +79,37 @@ export default function HistorySalaries({ navigation }) {
       }
     }
   };
+
   return (
     <View style={styles.container}>
-      <View style={styles.dasar}>
-        <View style={styles.headerContainer}>
-          <TouchableOpacity onPress={goHome} style={styles.iconContainer}>
-            <FontAwesomeIcon icon={faArrowLeft} size={25} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerText}>History Salary</Text>
-        </View>
-        <Text style={styles.sectionText}>Your History Payroll Year</Text>
-
-        <View style={styles.yearInputContainer}>
-          <View style={styles.searchIcon}>
-
-            <FontAwesomeIcon icon={faSearch} size={20} color="#333"  />
-          </View>
-          <TextInput
-            style={styles.yearInput}
-            value={selectedYear}
-            onChangeText={handleYearChange}
-            keyboardType="numeric"
-            maxLength={4}
-            placeholder="Enter year"
-            placeholderTextColor="#333"
-          />
-        </View>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={goHome} style={styles.iconContainer}>
+          <FontAwesomeIcon icon={faChevronLeft} size={25} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>History Salary</Text>
       </View>
 
-      <View style={styles.contentWhite}>
-        <View style={styles.containerContent}>
-          {(typeof salaryData === 'undefined' || salaryData.length === 0) && !messages ? (
-            <Text style={styles.messagesText}>Data penggajian belum tersedia. Silakan cek kembali nanti.</Text>
-          ) : (
-            <FlatList
-              data={salaryData}
-              renderItem={({ item }) => (
+      <View style={styles.inputContainer}>
+        <FontAwesomeIcon icon={faSearch} size={20} color="#666" style={styles.searchIcon} />
+        <TextInput
+          style={styles.yearInput}
+          value={selectedYear}
+          onChangeText={handleYearChange}
+          keyboardType="numeric"
+          maxLength={4}
+          placeholder="Enter by year"
+          placeholderTextColor="#666"
+        />
+      </View>
+
+      <View style={styles.contentContainer}>
+        {(typeof salaryData === 'undefined' || salaryData.length === 0) && !messages ? (
+          <Text style={styles.messagesText}>Data penggajian belum tersedia. Silakan cek kembali nanti.</Text>
+        ) : (
+          <FlatList
+            data={salaryData}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => openDetailModal(item)}>
                 <View style={styles.itemContainer}>
                   <View style={styles.itemTextContainer}>
                     <Text style={styles.monthText}>{item.Month}</Text>
@@ -121,35 +118,39 @@ export default function HistorySalaries({ navigation }) {
                   </View>
                   <Text style={styles.salaryText}>{formattedEarnings(item.Earnings)}</Text>
                 </View>
-              )}
-              keyExtractor={(item, index) => index.toString()}
-            />
-          )}
-        </View>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={yearModalVisible}
-          onRequestClose={closeYearModal}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <TouchableOpacity style={styles.closeButton} onPress={closeYearModal}>
-                <Text style={styles.closeButtonText}>Close</Text>
               </TouchableOpacity>
-              <FlatList
-                data={years}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleYearSelect(item)}>
-                    <Text style={styles.yearItem}>{item}</Text>
-                  </TouchableOpacity>
-                )}
-                keyExtractor={(item) => item.toString()}
-              />
-            </View>
-          </View>
-        </Modal>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        )}
       </View>
+      <Modal
+      animationType="slide"
+      transparent={true}
+      visible={detailModalVisible}
+      onRequestClose={closeDetailModal}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+
+          <Text style={styles.receiptHeader}>Salary Details | {selectedItem?.Month}</Text>
+          <View style={styles.receiptContainer}>
+            <Text style={styles.receiptText}>Status Nikah: {selectedItem?.["Status Nikah"]}</Text>
+            <Text style={styles.receiptText}>Jumlah Anak: {selectedItem?.["Jumlah Tanggungan"]}</Text>
+            <Text style={styles.receiptText}>Total Hadir: {selectedItem?.["Total Hadir"]}</Text>
+            <Text style={styles.receiptText}>Total Tunjangan Makan: {formattedEarnings(selectedItem?.["Total Tunjangan Makan"])}</Text>
+            {/* <Text style={styles.receiptText}>Total PPh 21: {formattedEarnings(selectedItem?.["Total PPh 21"])}</Text> */}
+            <Text style={styles.receiptText}>Earnings: {formattedEarnings(selectedItem?.Earnings)}</Text>
+          </View>
+          <TouchableOpacity style={styles.closeButton} onPress={closeDetailModal}>
+            <FontAwesomeIcon icon={faTimes} size={20} color="#900" />
+            <Text style={{right:7}}>Close</Text>
+          </TouchableOpacity>
+        </View>
+        
+      </View>
+    </Modal>
+
     </View>
   );
 }
@@ -157,72 +158,92 @@ export default function HistorySalaries({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
-  },
-  dasar: {
-    backgroundColor: '#E1AEFF',
-    height: 270, // Adjust the height as needed
+    backgroundColor: '#f0f0f0',
   },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 30,
     paddingVertical: 50,
-    position: 'relative',
+    backgroundColor: '#d32f2f',
   },
   iconContainer: {
     position: 'absolute',
-    left: 30,
-  },
-  contentWhite: {
-    backgroundColor: '#f5f5f5',
-    width: '100%',
-    flex: 1,
-    borderRadius: 30,
-    padding: 30,
-    marginTop: 0, // Adjust to position the white content area correctly over the red background
+    left: 20,
+    top:70
   },
   headerText: {
-    fontSize: 24,
-    fontWeight: '500',
-    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginTop:20
   },
-  sectionText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: 'white',
-    alignSelf: 'center',
-    letterSpacing: 2,
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 5,
   },
   searchIcon: {
     marginRight: 10,
   },
-  yearInputContainer: {
-    flexDirection: 'row',
-    fontSize: 16,
-    fontWeight: 'bold',
-    alignContent: 'center',
-    marginHorizontal:50,
-    padding:20,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    color: '#333',
-    borderRadius: 8,
-    marginBottom: 16,
-  },
   yearInput: {
-
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
   },
-  yearButton: {
+  contentContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  itemTextContainer: {
+    flexDirection: 'column',
+  },
+  monthText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#333',
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  salaryText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#6200ee',
+  },
+  messagesText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#d32f2f',
     textAlign: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    color: '#fff',
-    borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    marginVertical: 'auto', // Centers the message vertically
   },
   modalContainer: {
     flex: 1,
@@ -232,56 +253,36 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff',
+    borderRadius: 10,
     padding: 20,
-    borderRadius: 8,
     width: '80%',
     maxHeight: '80%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   closeButton: {
-    alignSelf: 'flex-end',
+    // position: 'absolute',
+    // top: 10,
+    // right: 10,
     padding: 10,
   },
-  closeButtonText: {
-    fontSize: 16,
-    color: '#2196f3',
+  receiptHeader: {
+    fontSize: 20,
     fontWeight: 'bold',
-  },
-  yearItem: {
-    fontSize: 18,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  itemContainer: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  itemTextContainer: {
-    flexDirection: 'column',
-  },
-  monthText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  dateText: {
-    fontSize: 14,
-    color: '#888',
-  },
-  salaryText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  messagesText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'red',
+    marginBottom: 20,
     textAlign: 'center',
-    marginTop: 300,
+    color: '#900',
+  },
+  receiptContainer: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 20,
+    borderRadius: 10,
+  },
+  receiptText: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: '#333',
   },
 });

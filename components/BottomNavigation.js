@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Modal, Pressable, Dimensions } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Modal, Pressable, Dimensions, Image, Alert } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,10 +9,10 @@ const { width, height } = Dimensions.get('window');
 const wp = (percentage) => (width * percentage) / 100;
 const hp = (percentage) => (height * percentage) / 100;
 import useUserProfile from '../src/api/getUserProfile/index';
-const BottomNavigation = () => {
+const BottomNavigation = ({modalVisible, setModalVisible}) => {
 
   const navigation = useNavigation();
-  const [modalVisible, setModalVisible] = useState(false);
+  // const [modalVisible, setModalVisible] = useState(false);
   const [activePage, setActivePage] = useState('Home');
   const [isConnected, setIsConnected] = useState(true);
   const isFocused = useIsFocused();
@@ -139,6 +139,14 @@ const BottomNavigation = () => {
     navigation.navigate('History Letters');
     console.log('History Letters Screen');
   };
+  const goToAllAttendance = () => {
+    if (!isConnected) {
+        Alert.alert('No Internet Connection', 'Check your internet connection!');
+        return;
+      }
+    navigation.navigate('Month Attendance History'); 
+    console.log('Month Attendance History Screen')
+  };
   const buttonProfile = '#FF78C4';
   const buttonPayslip = '#E1AEFF';
   const buttonAll = '#e74c3c';
@@ -178,6 +186,12 @@ const goToOvertimeLetter = () => {
   navigation.navigate('Create Overtime Letter'); 
   console.log('Create Overtime Letter Screen')
 };
+const Card = ({ title, backgroundColor, icon, onPress }) => (
+  <TouchableOpacity style={[styles.card, { backgroundColor }]} onPress={onPress}>
+    <Image source={icon} style={styles.cardIcon} />
+    <Text style={styles.cardText}>{title}</Text>
+  </TouchableOpacity>
+);
   return (
     <View style={styles.nav}>
       <TouchableOpacity
@@ -212,43 +226,24 @@ const goToOvertimeLetter = () => {
     >
       <View style={styles.modalView}>
         <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(!modalVisible)}>
-          <FontAwesomeIcon icon={faTimes} size={30} color="#900" />
+          <FontAwesomeIcon icon={faTimes} size={30} color="#333" />
         </TouchableOpacity>
 
-        {/* Baris 1 */}
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={[styles.button, { backgroundColor: buttonProfile }]} onPress={goToProfile}>
-            <Text style={styles.modalText}>Profile</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.button, { backgroundColor: buttonProfile }]} onPress={goToPayslip}>
-            <Text style={styles.modalText}>PaySlip</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.button, { backgroundColor: buttonPayslip }]} onPress={goToAllLetter}>
-            <Text style={styles.modalText}>Create Letters</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.button, { backgroundColor: buttonPayslip }]} onPress={goToHistoryLetters}>
-            <Text style={styles.modalText}>History Letters</Text>
-          </TouchableOpacity>
+        <View style={styles.row}>
+          <Card title="Profile" backgroundColor="#FFCCCC" icon={require('../src/assets/images/profile.png')} onPress={goToProfile} />
+          <Card title="PaySlip" backgroundColor="#CCFFCC" icon={require('../src/assets/images/payslip_v2.png')} onPress={goToPayslip} />
+        </View>
+        
+        <View style={styles.row}>
+          <Card title="Create Letters" backgroundColor="#CCCCFF" icon={require('../src/assets/images/overtime_v1.png')} onPress={goToAllLetter} />
+          <Card title="History Letters" backgroundColor="#FFFFCC" icon={require('../src/assets/images/history.png')} onPress={goToHistoryLetters} />
         </View>
 
-        {/* Baris 2 */}
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={[styles.button, { backgroundColor: buttonPayslip }]}>
-            <Text style={styles.modalText}>Salaries</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, { backgroundColor: buttonProfile }]}>
-            <Text style={styles.modalText}>Attendance</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.button, { backgroundColor: buttonProfile }]}>
-            <Text style={styles.modalText}>Cuti</Text>
-          </TouchableOpacity>
+        <View style={styles.row}>
+          <Card title="Attendance" backgroundColor="#FFCCFF" icon={require('../src/assets/images/history_attendance_v1.png')} onPress={goToAllAttendance} />
+          <Card title="Cuti" backgroundColor="#FFCCCC" icon={require('../src/assets/images/cuti_v2.png')} />
         </View>
 
-        {/* Baris 3 (Quick Access) */}
         <View style={styles.quickAccessContainer}>
           <Text style={styles.quickAccess}>Quick Access</Text>
         </View>
@@ -299,49 +294,50 @@ const styles = StyleSheet.create({
 
   modalView: {
     flex: 1,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-    paddingTop: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,1)',
   },
   closeButton: {
     position: 'absolute',
-    top: 20,
-    right: 20,
-    marginBottom:20
+    top: 10,
+    right: 10,
   },
-  buttonRow: {
+  row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 20,
   },
-  button: {
-    flex: 1,
-    alignItems: 'center',
+  card: {
+    width: 140,
+    height: 140,
     justifyContent: 'center',
-    height: 100,
-    borderRadius: 10,
-    elevation: 3,
-    marginHorizontal: 5,
+    alignItems: 'center',
+    borderRadius: 20,
+    marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
-  modalText: {
+  cardIcon: {
+    width: 100,
+    height: 100,
+    marginRight: 10,
+  },
+  cardText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'white',
+    color:'#333f'
   },
   quickAccessContainer: {
     marginTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    paddingTop: 10,
-    alignItems: 'center',
   },
   quickAccess: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
   },
+
 });
 
 export default BottomNavigation;

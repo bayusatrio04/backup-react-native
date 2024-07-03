@@ -125,7 +125,6 @@ const ManageDashboardUserCreate = ({ navigation }) => {
                 'https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/auth/register',
                 {
                     username: formData.username,
-         
                     password: formData.password,
                     employee_id: formData.employee_id,
                     status: 10,
@@ -137,13 +136,11 @@ const ManageDashboardUserCreate = ({ navigation }) => {
                     },
                 }
             );
-    
-   
-    
-          
+            console.log('Response status:', response.status);
+            if (response.status === 200) {
                 SweetAlert.showAlertWithOptions({
                     title: 'Messages',
-                    subTitle: 'Berhasil mebuat user login data karyawan',
+                    subTitle: 'Berhasil membuat user login data karyawan',
                     confirmButtonTitle: 'OK',
                     confirmButtonColor: '#c71515',
                     otherButtonTitle: 'Cancel',
@@ -154,10 +151,15 @@ const ManageDashboardUserCreate = ({ navigation }) => {
                         fontSize: 40
                     }
                 });
-                console.log('Data karyawan berhasil disimpan ke database!');
+                console.log('Data User Login berhasil disimpan ke database!');
 
                 navigation.navigate("Employee Management");
                 navigation.navigate("Manage User Login");
+            }
+   
+    
+          
+
            
               
             

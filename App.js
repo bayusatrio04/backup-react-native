@@ -79,6 +79,7 @@ import DashboardManageStatusCreate from './src/screens/DashboardManageStatus/cre
 import DashboardManageType from './src/screens/DashboardManageType';
 import TypeDetail from './src/screens/DashboardManageType/read';
 import DashboardManageTypeCreate from './src/screens/DashboardManageType/create';
+import AttendanceDetailScreen from './src/screens/AllAttendanceScreen/assets/AttendanceDetailScreen';
 
 
 
@@ -150,6 +151,13 @@ function AppNavigator() {
           <Stack.Screen
           name="Month Attendance History"
           component={AllHistoryAttendance}
+          options={{
+            headerShown:true
+          }}
+        />
+          <Stack.Screen
+          name="AttendanceDetailScreen"
+          component={AttendanceDetailScreen}
           options={{
             headerShown:true
           }}

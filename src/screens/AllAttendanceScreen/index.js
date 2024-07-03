@@ -1,22 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Pressable, Alert, ActivityIndicator
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Modal,
+  Pressable,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowRightFromBracket, faArrowRightToBracket } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowRightFromBracket,
+  faArrowRightToBracket,
+} from '@fortawesome/free-solid-svg-icons';
+import TotalSummary from './assets/TotalSummary';
 
 const currentMonthIndex = new Date().getMonth();
 const currentYear = new Date().getFullYear();
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const months = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
 const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
 
-const API_ENDPOINT = "https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/absence/absensi-log/search";
+const API_ENDPOINT =
+  'https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/absence/absensi-log/search';
 
-// Component
-export default function AllHistoryAttendance() {
+export default function AllHistoryAttendance({ navigation }) {
   const [isConnected, setIsConnected] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(months[currentMonthIndex]);
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
@@ -26,9 +41,36 @@ export default function AllHistoryAttendance() {
   const [yearModalVisible, setYearModalVisible] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [totalData, setTotalData] = useState(0);
+  const [item, setItem] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const fetchData = async (page = 1) => {
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem('accessToken');
+      const response = await axios.get(API_ENDPOINT, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          page: page,
+          // Add other query params as needed based on selectedMonth and selectedYear
+        },
+      });
+
+      setFilteredData(prevData => page === 1 ? response.data.items : [...prevData, ...response.data.items]);
+      setTotalData(response.data._meta.totalCount);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      Alert.alert('Error', 'Failed to fetch data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
       setIsConnected(state.isConnected);
     });
 
@@ -44,12 +86,8 @@ export default function AllHistoryAttendance() {
   }, [isConnected]);
 
   useEffect(() => {
-    fetchData();
-  }, []); 
-
-  useEffect(() => {
     if (isSearching && selectedMonth && selectedYear) {
-      fetchData();
+      fetchData(1);
       setIsSearching(false);
     }
   }, [isSearching, selectedMonth, selectedYear]);
@@ -58,128 +96,68 @@ export default function AllHistoryAttendance() {
     setIsSearching(true);
   };
 
-  const filterDataByMonthAndYear = data => {
-    if (!data.items) return [];
-
-    const filteredItems = data.items.filter(item => {
-      const itemDate = new Date(item.tanggal_absensi);
-      const itemMonth = itemDate.getMonth();
-      const itemYear = itemDate.getFullYear();
-      return itemMonth === months.indexOf(selectedMonth) && itemYear.toString() === selectedYear;
-    });
-
-    const groupedData = filteredItems.reduce((acc, item) => {
-      const date = item.tanggal_absensi;
-      if (!acc[date]) {
-        acc[date] = { checkIn: null, checkOut: null };
-      }
-      if (item.id_absensi_type === 1) {
-        acc[date].checkIn = item;
-      } else if (item.id_absensi_type === 2) {
-        acc[date].checkOut = item;
-      }
-      return acc;
-    }, {});
-
-    return Object.entries(groupedData).map(([date, { checkIn, checkOut }]) => ({
-      date,
-      checkIn,
-      checkOut
-    }));
-  };
-
-  const handleFetchError = error => {
-    console.error("Error fetching data:", error);
-    Alert.alert('Error', 'Failed to fetch data. Please try again later.');
-  };
-
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      if (!selectedMonth || !selectedYear) {
-        return;
-      }
-      const token = await AsyncStorage.getItem('accessToken');
-      const queryParams = `?month=${months.indexOf(selectedMonth) + 1}&year=${selectedYear}`;
-      const response = await axios.get(API_ENDPOINT + queryParams, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      const data = response.data;
-      const filteredData = filterDataByMonthAndYear(data);
-      setFilteredData(filteredData);
-      setTotalData(filteredData.length);
-    } catch (error) {
-      handleFetchError(error);
-    }
-    setIsLoading(false);
-  };
-
-  const renderAttendanceData = () => {
-    if (isLoading) {
-      return <ActivityIndicator size="large" color="#0000ff" />;
-    } else if (!filteredData || filteredData.length === 0) {
-      return <Text>Data tidak ditemukan.</Text>;
-    } else {
-      return filteredData.map((item, index) => (
-        <View key={index} style={styles.attendanceItem}>
-          <Text style={styles.dateText}>{new Date(item.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</Text>
-          <View style={styles.timeContainer}>
-            <View style={styles.timeTextContainer}>
-              <View  style={styles.timeIcon}>
-              <FontAwesomeIcon icon={faArrowRightToBracket} size={20} color="blue" />
-              </View>
-              
-              <Text style={styles.timeText}>{item.checkIn ? item.checkIn.waktu_absensi : 'N/A'}</Text>
-            </View>
-            <View style={styles.timeTextContainer}>
-              <View  style={styles.timeIcon}>
-                <FontAwesomeIcon icon={faArrowRightFromBracket} size={20} color="blue"  />
-              </View>
-              <Text style={styles.timeText}>{item.checkOut ? item.checkOut.waktu_absensi : 'N/A'}</Text>
-            </View>
-          </View>
-        </View>
-      ));
+  const handleLoadMore = () => {
+    if (filteredData.length < totalData) {
+      fetchData(currentPage + 1);
     }
   };
 
   const monthButtons = months.map((month, index) => (
     <TouchableOpacity
       key={index}
-      style={[styles.monthButton, selectedMonth === month && styles.selectedMonthButton]}
+      style={[
+        styles.monthButton,
+        selectedMonth === month && styles.selectedMonthButton,
+      ]}
       onPress={() => {
         setSelectedMonth(month);
         setModalVisible(false);
       }}
     >
-      <Text style={[styles.monthButtonText, selectedMonth === month && { color: 'white' }]}>{month}</Text>
+      <Text
+        style={[
+          styles.monthButtonText,
+          selectedMonth === month && { color: 'white' },
+        ]}
+      >
+        Bulan : {month}
+      </Text>
     </TouchableOpacity>
   ));
 
   const yearButtons = years.map((year, index) => (
     <TouchableOpacity
       key={index}
-      style={[styles.yearButton, selectedYear === year.toString() && styles.selectedYearButton]}
+      style={[
+        styles.yearButton,
+        selectedYear === year.toString() && styles.selectedYearButton,
+      ]}
       onPress={() => {
         setSelectedYear(year.toString());
         setYearModalVisible(false);
       }}
     >
-      <Text style={[styles.yearButtonText, selectedYear === year.toString() && { color: 'white' }]}>{year}</Text>
+      <Text
+        style={[
+          styles.yearButtonText,
+          selectedYear === year.toString() && { color: 'white' },
+        ]}
+      >
+        Tahun : {year}
+      </Text>
     </TouchableOpacity>
   ));
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      <TotalSummary item={item} />
       <View style={styles.content}>
-        <Text style={styles.sectionHeader}>Choose Month</Text>
+        <Text style={styles.sectionHeader}>Choose Periode</Text>
         <TouchableOpacity
           style={styles.openModalButton}
           onPress={() => setModalVisible(true)}
         >
-          <Text style={styles.openModalButtonText}>{selectedMonth}</Text>
+          <Text style={styles.openModalButtonText}>Bulan : {selectedMonth}</Text>
         </TouchableOpacity>
         <Modal
           animationType="slide"
@@ -191,9 +169,7 @@ export default function AllHistoryAttendance() {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <ScrollView>
-                {monthButtons}
-              </ScrollView>
+              <ScrollView>{monthButtons}</ScrollView>
             </View>
             <Pressable
               style={styles.modalCloseButton}
@@ -204,12 +180,11 @@ export default function AllHistoryAttendance() {
           </View>
         </Modal>
 
-        <Text style={[styles.sectionHeader, { marginTop: 10 }]}>Choose Year</Text>
         <TouchableOpacity
           style={styles.openModalButton}
           onPress={() => setYearModalVisible(true)}
         >
-          <Text style={styles.openModalButtonText}>{selectedYear}</Text>
+          <Text style={styles.openModalButtonText}>Tahun : {selectedYear}</Text>
         </TouchableOpacity>
         <Modal
           animationType="slide"
@@ -221,9 +196,7 @@ export default function AllHistoryAttendance() {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <ScrollView>
-                {yearButtons}
-              </ScrollView>
+              <ScrollView>{yearButtons}</ScrollView>
             </View>
             <Pressable
               style={styles.modalCloseButton}
@@ -237,48 +210,69 @@ export default function AllHistoryAttendance() {
         <TouchableOpacity
           style={styles.searchButton}
           onPress={handleSearch}
+          disabled={isLoading}
         >
           <Text style={styles.searchButtonText}>Search</Text>
         </TouchableOpacity>
-      </View>
 
-      <ScrollView style={styles.tableContainer}>
-        {renderAttendanceData()}
-      </ScrollView>
-
-      <View style={styles.totalDataContainer}>
-        <Text style={styles.totalDataText}>Total Data: {totalData}</Text>
+        {isLoading && currentPage === 1 ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <ScrollView style={styles.containerContent}>
+            {filteredData.map((items, index) => (
+              <View key={index} style={styles.card}>
+                <View style={styles.cardContent}>
+                  <Text style={styles.dateText}>{items.tanggal_absensi}</Text>
+                  <TouchableOpacity
+                    style={styles.detailButton}
+                    onPress={() => navigation.navigate('AttendanceDetailScreen', { attendance: items })}
+                  >
+                    <Text style={styles.detailButtonText}>Detail</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+            {isLoading && currentPage > 1 && <ActivityIndicator size="large" color="#0000ff" />}
+            {!isLoading && filteredData.length < totalData && (
+              <TouchableOpacity
+                style={styles.loadMoreButton}
+                onPress={handleLoadMore}
+              >
+                <Text style={styles.loadMoreButtonText}>Load More</Text>
+              </TouchableOpacity>
+            )}
+          </ScrollView>
+        )}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     paddingHorizontal: 20,
-    paddingTop: 20,
   },
   content: {
-    flex: 0.7,
+    flex: 1,
   },
   sectionHeader: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginTop: 20,
     marginBottom: 5,
   },
   openModalButton: {
-    padding: 15,
-    backgroundColor: 'white',
+    padding: 10,
+    backgroundColor: '#f8f8f8',
     borderRadius: 5,
     marginBottom: 10,
-   
   },
   openModalButtonText: {
     fontSize: 16,
-    fontWeight:'bold',
-     alignSelf:'center'
+    fontWeight: 'bold',
+    alignSelf: 'center',
   },
   modalContainer: {
     flex: 1,
@@ -300,15 +294,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalCloseButtonText: {
-    color: '#fff',
+    color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   monthButton: {
-    marginVertical: 5,
     padding: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f8f8',
     borderRadius: 5,
-    minWidth: 80,
+    marginBottom: 5,
     alignItems: 'center',
   },
   selectedMonthButton: {
@@ -316,13 +310,13 @@ const styles = StyleSheet.create({
   },
   monthButtonText: {
     fontSize: 16,
+    fontWeight: 'bold',
   },
   yearButton: {
-    marginVertical: 5,
     padding: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f8f8',
     borderRadius: 5,
-    minWidth: 60,
+    marginBottom: 5,
     alignItems: 'center',
   },
   selectedYearButton: {
@@ -330,58 +324,57 @@ const styles = StyleSheet.create({
   },
   yearButtonText: {
     fontSize: 16,
-    alignSelf:'center'
+    fontWeight: 'bold',
   },
   searchButton: {
+    marginTop: 20,
     padding: 10,
     backgroundColor: '#2196f3',
     borderRadius: 5,
-    marginTop: 20,
-  },
-  searchButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    alignSelf:'center'
-  },
-  tableContainer: {
-    flex: 1,
-    marginTop: 10,
-  },
-  attendanceItem: {
-    marginBottom: 10,
-    padding: 15,
-    borderLeftWidth:3,
-    borderColor: '#2196f3',
-    borderRadius: 20,
-    backgroundColor:'white'
-  },
-  dateText: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  timeTextContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
   },
-  timeIcon: {
-    marginRight: 10,
-    backgroundColor: 'rgba(207, 218, 255, 0.3)',
+  searchButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  containerContent: {
+    flex: 1,
+  },
+  card: {
+    backgroundColor: '#f8f8f8',
     padding: 10,
     borderRadius: 5,
+    marginBottom: 10,
   },
-  timeText: {
+  cardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dateText: {
     fontSize: 16,
+    fontWeight: 'bold',
   },
-  totalDataContainer: {
-    alignItems: 'flex-end',
+  detailButton: {
+    backgroundColor: '#2196f3',
+    padding: 5,
+    borderRadius: 5,
+  },
+  detailButtonText: {
+    color: 'white',
+    fontSize: 14,
+  },
+  loadMoreButton: {
+    padding: 10,
+    backgroundColor: '#2196f3',
+    borderRadius: 5,
+    alignItems: 'center',
     marginVertical: 10,
   },
-  totalDataText: {
-    fontSize: 18,
+  loadMoreButtonText: {
+    color: 'white',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

@@ -30,7 +30,8 @@ const UserLoginDetailScreen = ({ route, navigation }) => {
             console.log("data userlogin:", response.data);
             // console.log("data username:", userDetail.data.username);
             setUserDetail(response.data);
-            setNewUsername(response.data.username);
+
+            setNewUsername(response.data.data.username);
          
         } catch (error) {
             console.error('Error fetching user login detail:', error);
@@ -49,17 +50,18 @@ const UserLoginDetailScreen = ({ route, navigation }) => {
     const resetPassword = async () => {
         try {
             const token = await AsyncStorage.getItem('accessToken');
-            console.log('Access Token:', token);
+            
 
             if (!token) {
                 throw new Error('Token tidak ditemukan di AsyncStorage');
             }
             const response = await axios.post(
-                `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/users/reset-password`,
+                `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/users/reset-password-default`,
                 { id: userDetail.data.id },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             Alert.alert('Success', 'Password has been reset to default.', [{ text: 'OK' }]);
+            console.log('Berhasil Reset Password #ID', userDetail.data.id);
         } catch (error) {
             console.error('Error resetting password:', error);
             SweetAlert.showAlertWithOptions({
@@ -197,6 +199,15 @@ const UserLoginDetailScreen = ({ route, navigation }) => {
                 ...prevDetail,
                 data: { ...prevDetail.data, username: newUsername } // Perbaiki update username di sini
             }));
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Behasil Mengganti Username.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
 
             setEditModeUsername(false); 
         } catch (error) {
@@ -256,7 +267,7 @@ const UserLoginDetailScreen = ({ route, navigation }) => {
 
             </View>
             <View style={styles.detailContainer}>
-                <Text style={styles.label}>Password:</Text>
+                <Text style={styles.label}>Password: (default: 'Djipay@123' )</Text>
                 <Text style={styles.value}>{userDetail.data.password_hash}</Text>
             </View>
             <View style={styles.detailContainer}>
@@ -264,12 +275,12 @@ const UserLoginDetailScreen = ({ route, navigation }) => {
                 {userDetail.data.status === 9 ? (
                     <>
                         <Text style={[styles.value, { backgroundColor: 'red', alignSelf: 'center', color: 'white', padding: 5, borderRadius: 30, fontSize: 12 }]}>Deactive</Text>
-                        <TouchableOpacity onPress={handleActivedStatus}><Text>Aktifkan</Text></TouchableOpacity>
+                        <TouchableOpacity onPress={handleActivedStatus}><Text style={{backgroundColor:'green', color:'white', padding:4, alignSelf: 'flex-start'}}>Aktifkan</Text></TouchableOpacity>
                     </>
                 ) : (
                     <>
                         <Text style={[styles.value, { backgroundColor: 'green', alignSelf: 'center', color: 'white', padding: 5, borderRadius: 30, fontSize: 12 }]}>Active</Text>
-                        <TouchableOpacity onPress={handleDeactivedStatus}><Text>Non-Aktifkan</Text></TouchableOpacity>
+                        <TouchableOpacity onPress={handleDeactivedStatus}><Text style={{backgroundColor:'red', color:'white', padding:4, alignSelf: 'flex-start'}}>Non-Aktifkan</Text></TouchableOpacity>
                     </>
                 )}
             </View>

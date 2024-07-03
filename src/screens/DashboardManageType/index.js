@@ -108,7 +108,7 @@ const DashboardManageType = ({ navigation }) => {
     };
 
     const goToCreateType = () =>{
-        navigation.navigate('Create New Status');
+        navigation.navigate('Create New Type');
     };
     const viewDetailType = async(type_id) =>{
         navigation.navigate('TypeDetail', { id: type_id });

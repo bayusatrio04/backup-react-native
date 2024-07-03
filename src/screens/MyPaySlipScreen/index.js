@@ -37,7 +37,7 @@ const PayslipScreen = ({ navigation }) => {
         { id: '12', name: 'December' },
     ]);
     
-    const [years, setYears] = useState(Array.from({ length: 7 }, (_, i) => (new Date().getFullYear() - 5) + i));
+    const [years, setYears] = useState(Array.from({ length: 12 }, (_, i) => (new Date().getFullYear() - 10) + i));
 
     const handleMonthSelect = (selectedMonth) => {
         setSelectedMonth(selectedMonth);
@@ -68,6 +68,7 @@ const PayslipScreen = ({ navigation }) => {
         navigation.navigate('Home');
         console.log('Home Screen');
     };
+ 
 
     useEffect(() => {
         const fetchSalaryData = async () => {
@@ -80,6 +81,8 @@ const PayslipScreen = ({ navigation }) => {
                             setSalaryData(data);
                         } else {
                             Alert.alert('Error', 'No salary data available for the selected month and year.');
+                           await navigation.navigate('Home');
+                           await navigation.navigate("PayslipScreen");
                         }
                     } else {
                         Alert.alert('Error', 'No data returned from the server.');
@@ -90,7 +93,7 @@ const PayslipScreen = ({ navigation }) => {
                 }
             }   
         };
-
+    
         fetchSalaryData();
     }, [isConnected, selectedMonth, selectedYear]);
 
@@ -100,7 +103,7 @@ const PayslipScreen = ({ navigation }) => {
                 <Text style={styles.alertText}>Check your internet connection!</Text>
             </View>
         );
-    }
+    };
 
     if (!salaryData) {
         return (
@@ -108,8 +111,14 @@ const PayslipScreen = ({ navigation }) => {
                 <Text>Loading...</Text>
             </View>
         );
-    }
-
+    };
+    if (salaryData.Status === "204") {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.alertText}>{salaryData.Messages}</Text>
+            </View>
+        );
+    };
     const { Month, data } = salaryData;
     const salaryDetails = data[0] || {
         'Total Gaji': 0,
@@ -131,10 +140,13 @@ const PayslipScreen = ({ navigation }) => {
       salaryDetails['Total Deductions Iuran Pensiun'];
       const calculateNetBrutoseTahun = calculateNetBrutoBulan * 12;
       const pkp = calculateNetBrutoseTahun - salaryDetails['Total PTKP'];
+
       const goToAttendance =() =>{
         navigation.navigate('Attendance Summary'); 
         console.log('History Attendance Screen')
-            }
+    };
+    
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -163,17 +175,17 @@ const PayslipScreen = ({ navigation }) => {
                         </View>
                     </View>
                     <View style={styles.periodeContainer}>
-                        <Text style={styles.periodeText}>Periode PaySlips</Text>
+                        <Text style={styles.periodeText}>Periode Payslip</Text>
                         <TouchableOpacity style={styles.periodeMonth} onPress={toggleMonthPicker}>
                             <View style={styles.periodeIcon}>
-                                <FontAwesomeIcon icon={faCalendarDays} size={25} color="#898383" style={styles.iconCalendar} />
+                                <FontAwesomeIcon icon={faCalendarDays} size={25} color="white" style={styles.iconCalendar} />
                             </View>
                             <Text style={styles.periodeTextMonth}>{selectedMonth || 'Select Month'}</Text>
                             <FontAwesomeIcon icon={faChevronDown} size={15} color="#898383" style={styles.iconCalendar} />
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.periodeYear} onPress={toggleYearPicker}>
                             <View style={styles.periodeIcon}>
-                                <FontAwesomeIcon icon={faCalendarDays} size={25} color="#898383" style={styles.iconCalendar} />
+                                <FontAwesomeIcon icon={faCalendarDays} size={25} color="white" style={styles.iconCalendar} />
                             </View>
                             <Text style={styles.periodeTextMonth}>{selectedYear || 'Select Year'}</Text>
                             <FontAwesomeIcon icon={faChevronDown} size={15} color="#898383" style={styles.iconCalendar} />
@@ -317,36 +329,44 @@ const PayslipScreen = ({ navigation }) => {
             </ScrollView>
             <Modal animationType="slide" transparent={true} visible={showMonthPicker}>
                 <View style={styles.modalContainer}>
-                <TouchableOpacity style={styles.closeButton} onPress={() => setShowMonthPicker(false)}>
-                    <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
+                <View style={styles.modalContent}>
+                    <View style={styles.modalHeader}>
+                    <Text style={styles.modalHeaderText}>Select Month</Text>
+                    <TouchableOpacity onPress={toggleMonthPicker}>
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                    </View>
                     <FlatList
-                        data={months}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => (
-                            <TouchableOpacity onPress={() => handleMonthSelect(item.id)}>
-                                <Text style={styles.modalItem}>{item.name}</Text>
-                            </TouchableOpacity>
-                        )}
+                    data={months}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => handleMonthSelect(item.id)}>
+                        <Text style={styles.modalItem}>{item.name}</Text>
+                        </TouchableOpacity>
+                    )}
                     />
-
-                    
+                </View>
                 </View>
             </Modal>
             <Modal animationType="slide" transparent={true} visible={showYearPicker}>
                 <View style={styles.modalContainer}>
-                <TouchableOpacity style={styles.closeButton} onPress={() => setShowYearPicker(false)}>
-                    <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
+                <View style={styles.modalContent}>
+                    <View style={styles.modalHeader}>
+                    <Text style={styles.modalHeaderText}>Select Year</Text>
+                    <TouchableOpacity onPress={toggleYearPicker}>
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                    </View>
                     <FlatList
-                        data={years}
-                        keyExtractor={(item) => item.toString()}
-                        renderItem={({ item }) => (
-                            <TouchableOpacity onPress={() => handleYearSelect(item)}>
-                                <Text style={styles.modalItem}>{item}</Text>
-                            </TouchableOpacity>
-                        )}
+                    data={years}
+                    keyExtractor={(item) => item.toString()}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => handleYearSelect(item)}>
+                        <Text style={styles.modalItem}>{item}</Text>
+                        </TouchableOpacity>
+                    )}
                     />
+                </View>
                 </View>
             </Modal>
         </View>

@@ -177,9 +177,8 @@ const styles = StyleSheet.create({
     top: 80,
     left: 30,
     fontSize: FontSize.size_2xs,
-    width: 152,
-    alignItems: "flex-end",
-    display: "flex",
+    width: 170,
+ 
     letterSpacing: 0.1,
   },
 

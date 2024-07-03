@@ -76,6 +76,15 @@ const EmployeeDetailScreen = ({ route, navigation }) => {
 
             if (response.status === 200) {
                 console.log(`Successfully updated ${field}`);
+                SweetAlert.showAlertWithOptions({
+                    title: 'Success',
+                    subTitle: `Berhasil Mengganti ${field}.`,
+                    confirmButtonTitle: 'OK',
+                    confirmButtonColor: '#c71515',
+                    style: 'success',
+                    cancellable: true,
+                    subTitleStyle: { fontSize: 16 },
+                });
             }
         } catch (error) {
             console.error(`Error updating ${field}:`, error);
@@ -99,11 +108,11 @@ const EmployeeDetailScreen = ({ route, navigation }) => {
         );
     }
 
-    const renderEditableField = (label, field) => {
+    const renderEditableField = (label, field, editable = true) => {
         return (
             <View style={styles.detailContainer}>
                 <Text style={styles.label}>{label}:</Text>
-                {editField === field ? (
+                {editField === field && editable ?(
                     <View>
                         <TextInput
                             style={styles.input}
@@ -135,9 +144,9 @@ const EmployeeDetailScreen = ({ route, navigation }) => {
             {renderEditableField('Gender', 'jenis_kelamin')}
             {renderEditableField('Phone Number', 'no_telepon')}
             {renderEditableField('Marital Status', 'status_nikah')}
-            {renderEditableField('Anaks', 'jumlah_tanggungan')}
+            {renderEditableField('Anak', 'jumlah_tanggungan')}
             {renderEditableField('Date of Birth', 'tanggal_lahir')}
-            {renderEditableField('Position', 'position_name')}
+            {renderEditableField('Position', 'position_name', false)}
             {renderEditableField('Employee Type', 'type_karyawan')}
             <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Employee Management')}>
                 <Text style={styles.buttonText}>Back</Text>

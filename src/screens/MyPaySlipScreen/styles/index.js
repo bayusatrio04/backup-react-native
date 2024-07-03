@@ -110,40 +110,43 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: 'white',
     },
-    closeButton: {
-        marginTop: 10,
-        left:140,
-        padding: 10,
-        backgroundColor: 'red',
-        borderRadius: 5,
-    },
-    closeButtonText: {
-        color: 'white',
-        fontSize: 18,
-    },
-
     modalContainer: {
         flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.828)',
-    },
-    modalItem: {
-        margin: 5,
-        backgroundColor: 'white',
-        color:'red',
+      },
+      modalContent: {
+        backgroundColor: '#fff',
+        width: '80%',
         borderRadius: 10,
-        padding: 30,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
+        padding: 20,
         elevation: 5,
-    },
+      },
+      modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+      },
+      modalHeaderText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+      },
+      closeButton: {
+        alignSelf: 'flex-end',
+        padding: 10,
+      },
+      closeButtonText: {
+        color: '#007BFF',
+        fontWeight: 'bold',
+      },
+      modalItem: {
+        paddingVertical: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        fontSize: 16,
+      },
 
 
 
@@ -152,7 +155,7 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         borderRadius: 10,
-        backgroundColor: '#d9d9d97a',
+        backgroundColor: '#FFCCCC',
         justifyContent: 'center',
     },
     iconCalendar: {

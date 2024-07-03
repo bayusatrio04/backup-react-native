@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, TouchableOpacity, Button, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Card, Title, Paragraph } from 'react-native-paper';
 
 const DashboardManageAbsensi = ({ navigation }) => {
     const [totals, setTotals] = useState({ total_absensi: 0, total_checkin: 0, total_checkout: 0, total_on_progress: 0 });
     const [absensiLogs, setAbsensiLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const [hasNextPage, setHasNextPage] = useState(true); // Flag to track if there's more data to load
+    const [hasNextPage, setHasNextPage] = useState(true);
 
     // State for search functionality
     const [searchText, setSearchText] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [searchType, setSearchType] = useState('id'); // 'id' or 'date'
 
     useEffect(() => {
         fetchTotalAbsensi();
-        fetchAllAbsensiLogs(1); // Start fetching from page 1
+        fetchAllAbsensiLogs(1);
     }, []);
 
     useEffect(() => {
@@ -25,8 +25,6 @@ const DashboardManageAbsensi = ({ navigation }) => {
             setSearchResults([]);
         }
     }, [searchText]);
-
-    console.log('total datanya : ', totals.total_absensi);
 
     const fetchTotalAbsensi = async () => {
         setLoading(true);
@@ -64,7 +62,7 @@ const DashboardManageAbsensi = ({ navigation }) => {
                 Alert.alert('Token not found');
                 return;
             }
-            
+    
             const response = await fetch(`https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/absence/absensi-log/index?page=${page}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -78,15 +76,10 @@ const DashboardManageAbsensi = ({ navigation }) => {
     
             const result = await response.json();
     
-            // Filter out duplicates before updating state
-            const uniqueLogs = result.items.filter((item) => {
-                // Use Set to track existing log ids
-                return !absensiLogs.some((log) => log.id === item.id);
-            });
+            const uniqueLogs = result.items.filter(item => !absensiLogs.some(log => log.id === item.id));
     
-            // Update state based on current and new data
             setAbsensiLogs(prevLogs => [...prevLogs, ...uniqueLogs]);
-            setHasNextPage(result._meta.currentPage < result._meta.pageCount); // Check if there's another page
+            setHasNextPage(result._meta.currentPage < result._meta.pageCount);
         } catch (error) {
             console.error('Error fetching absensi logs:', error);
             Alert.alert('Error', 'Something went wrong while fetching data');
@@ -103,32 +96,35 @@ const DashboardManageAbsensi = ({ navigation }) => {
 
     const renderAbsensiLogs = () => {
         const logsToRender = searchText.length > 0 ? searchResults : absensiLogs;
-
+    
         if (!logsToRender || logsToRender.length === 0) {
             return <Text style={styles.text}>No data available</Text>;
         }
-
-        return logsToRender.map((log, index) => (
-            <Card key={index} style={styles.card} onPress={() => viewDetail(log.id)}>
-                <Card.Content>
-                    <Title>ID: #{log.id}</Title>
-                    <Paragraph>User ID: {log.created_by}</Paragraph>
-                </Card.Content>
-                <Card.Actions>
-                    <TouchableOpacity onPress={() => viewDetail(log.id)}>
-                        <Text style={styles.viewDetailText}>View Detail</Text>
-                    </TouchableOpacity>
-                </Card.Actions>
-            </Card>
-        ));
+    
+        return logsToRender.map((log, index) => {
+            const badgeBackgroundColor = log.id_absensi_type === 1 ? 'green' : '#900';
+            return (
+                <TouchableOpacity key={index} style={styles.logContainer} onPress={() => viewDetail(log.id)}>
+                    <View style={[styles.badgeContainer, { backgroundColor: badgeBackgroundColor }]}>
+                        <Text style={styles.badgeText}>{log.id_absensi_type === 1 ? 'CHECK-IN' : 'CHECK-OUT'}</Text>
+                    </View>
+                    <Text style={styles.viewDetailText}>Date: {log.tanggal_absensi}</Text>
+                    <Text style={styles.logText}>ID: #{log.id}</Text>
+                    <Text style={styles.logText}>Created By: {log.created_by}</Text>
+                  
+                    <View style={styles.bottomRow}>
+                        <Text style={styles.viewDetailText} onPress={() => viewDetail(log.id)}>View Detail</Text>
+                        <Text style={[styles.badgeText, styles.absensiTime, { backgroundColor: badgeBackgroundColor }]}>{log.waktu_absensi}</Text>
+                    </View>
+                </TouchableOpacity>
+            );
+        });
     };
-
+    
     const viewDetail = (id) => {
         navigation.navigate('AbsensiDetail', { id });
-        console.log('id yg dibwa:', id)
     };
 
-    // Function to perform search
     const searchLogs = async (page = 1) => {
         setIsSearching(true);
         try {
@@ -151,18 +147,22 @@ const DashboardManageAbsensi = ({ navigation }) => {
     
             const result = await response.json();
     
-            const foundLog = result.items.find(log => log.id.toString() === searchText);
-
-            if (foundLog) {
-                setSearchResults([foundLog]); // Set hasil pencarian
+            const filteredLogs = result.items.filter(log => {
+                if (searchType === 'id') {
+                    return searchText && log.id.toString() === searchText;
+                }
+                return false;
+            });
+    
+            if (filteredLogs.length > 0) {
+                setSearchResults(filteredLogs);
                 setIsSearching(false);
-                setCurrentPage(page); // Set halaman saat ini ke halaman tempat ID ditemukan
+                setCurrentPage(page);
             } else if (result._meta.currentPage < result._meta.pageCount) {
-                // Lanjutkan ke halaman berikutnya jika tidak ditemukan dan masih ada halaman
                 searchLogs(page + 1);
             } else {
-                // Jika tidak ditemukan dan tidak ada halaman lagi
-                Alert.alert('ID not found');
+                Alert.alert('No results found');
+                setSearchResults([]);
                 setIsSearching(false);
             }
         } catch (error) {
@@ -177,11 +177,12 @@ const DashboardManageAbsensi = ({ navigation }) => {
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search by log ID..."
-                    onChangeText={text => setSearchText(text)}
+                    placeholder="Search by ID..."
+                    onChangeText={setSearchText}
                     value={searchText}
+                    editable={searchType === 'id'}
                 />
-                <Button title="Search" onPress={() => searchLogs(1)} />
+                <Button title="Search By ID" onPress={() => { setSearchType('id'); searchLogs(1); }} />
             </View>
             {loading || isSearching ? (
                 <ActivityIndicator size="large" color="#0000ff" />
@@ -192,7 +193,7 @@ const DashboardManageAbsensi = ({ navigation }) => {
                     )}
                     {renderAbsensiLogs()}
                     {hasNextPage && !searchText && (
-                        <Button title="Load More" onPress={loadMoreData} />
+                        <Button title="Load More Data" onPress={loadMoreData} />
                     )}
                 </ScrollView>
             )}
@@ -209,18 +210,6 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 16,
         marginBottom: 8,
-    },
-    card: {
-        marginBottom: 16,
-        borderRadius: 8,
-        elevation: 4,
-    },
-    viewDetailText: {
-        color: 'blue',
-        fontSize: 14,
-        marginTop: 8,
-        textAlign: 'center',
-        textDecorationLine: 'underline',
     },
     searchContainer: {
         flexDirection: 'row',
@@ -241,6 +230,47 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 16,
+    },
+    logContainer: {
+        padding: 15,
+        marginVertical: 10,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        position: 'relative',
+    },
+    logText: {
+        fontSize: 16,
+        color: '#333',
+    },
+    viewDetailText: {
+        fontSize: 16,
+        color: '#007BFF',
+    },
+    badgeContainer: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    badgeText: {
+        color: '#fff',
+        fontSize: 12,
+    },
+    bottomRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    absensiTime: {
+        paddingVertical: 2,
+        paddingHorizontal: 5,
+        borderRadius: 5,
     },
 });
 

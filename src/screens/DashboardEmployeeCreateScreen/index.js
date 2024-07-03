@@ -430,13 +430,13 @@ const styles = StyleSheet.create({
     },
     dasarRed: {
         backgroundColor: '#6759ff',
-        height: 200, // Adjust the height as needed
+        height: 250, // Adjust the height as needed
     },
     headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 40,
-        paddingVertical: 60
+        paddingVertical: 100
     },
     contentWhite: {
         backgroundColor: 'white',
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
         flex: 1,
         borderRadius: 30,
         padding: 30,
-        marginTop: -90, // Adjust to position the white content area correctly over the red background
+        marginTop: -80, // Adjust to position the white content area correctly over the red background
     },
     headerText: {
         fontSize: 20,

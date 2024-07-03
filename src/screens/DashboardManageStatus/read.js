@@ -92,7 +92,15 @@ const StatusDetail = ({ route, navigation }) => {
                 ...prevDetail,
                 data: { ...prevDetail.data, status: newStatus } // Perbaiki update username di sini
             }));
-
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Berhasil mengubah data.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
             setEditModeStatus(false); 
         } catch (error) {
             console.error('Error saving status:', error);
@@ -145,7 +153,15 @@ const StatusDetail = ({ route, navigation }) => {
                 ...prevDetail,
                 data: { ...prevDetail.data, description: newDesc } // Perbaiki update username di sini
             }));
-
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Berhasil mengubah data.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
             setEditModeDesc(false); 
         } catch (error) {
             console.error('Error saving description:', error);

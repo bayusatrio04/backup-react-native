@@ -168,7 +168,7 @@ const OvertimeUpdateScreen = ({ route, navigation }) => {
             <View style={styles.formContainer}>
  
                 <TouchableOpacity style={styles.rateButton} onPress={() => setModalVisible(true)}>
-                    <Text>{selectedRate ? `Gaji Overtime/Jam: ${formatCurrency(selectedRate)}` : 'Pilih Rate Overtime'}</Text>
+                    <Text style={{color:'white'}}>{selectedRate ? `Gaji Overtime/Jam: ${formatCurrency(selectedRate)}` : 'Pilih Rate Overtime'}</Text>
                 </TouchableOpacity>
                 <Text style={styles.label}>Total Compensation</Text>
                 <TextInput
@@ -211,7 +211,7 @@ const OvertimeUpdateScreen = ({ route, navigation }) => {
                                     style={styles.rateOption}
                                     onPress={() => handleRateSelection(item)}
                                 >
-                                    <Text>{item}</Text>
+                                    <Text>{formatCurrency(item)}</Text>
                                 </TouchableOpacity>
                             )}
                             keyExtractor={(item) => item.toString()}
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
 
 
     rateButton: {
-        backgroundColor: '#ffa39e',
+        backgroundColor: '#333',
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',

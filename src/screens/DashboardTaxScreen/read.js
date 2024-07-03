@@ -40,12 +40,18 @@ const DetailTaxScreen = ({ route, navigation }) => {
                 `https://basically-wanted-wombat.ngrok-free.app/rest-api-yii/api/web/index.php/salary/manage-tax/view?id=${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            if (response.status === 200){
 
-            console.log("Data position:", response.data);
-            setTaxDetail(response.data);
-            setNewPercentage(response.data.percentage); 
-            setNewDescription(response.data.description); 
-            setNewMasaBerlaku(response.data.masa_berlaku); 
+
+                console.log("Data position:", response.data);
+                setTaxDetail(response.data);
+                setNewPercentage(response.data.percentage); 
+          
+                setNewMasaBerlaku(response.data.masa_berlaku); 
+    
+                }
+
+
         } catch (error) {
             console.error('Error fetching Tax detail:', error);
             SweetAlert.showAlertWithOptions({
@@ -88,7 +94,15 @@ const DetailTaxScreen = ({ route, navigation }) => {
                 ...prevDetail,
                 masa_berlaku: newMasaBerlaku,
             }));
-
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Berhasil mengubah data .',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'Success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
             setEditModeMasaBerlaku(false); // Nonaktifkan mode edit setelah berhasil disimpan
         } catch (error) {
             console.error('Error saving Masa Berlaku:', error);
@@ -131,7 +145,15 @@ const DetailTaxScreen = ({ route, navigation }) => {
                 ...prevDetail,
                 percentage: newPercentage,
             }));
-
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Berhasil mengubah data .',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'Success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
             setEditModePercentage(false); // Nonaktifkan mode edit setelah berhasil disimpan
         } catch (error) {
             console.error('Error saving Percentage:', error);
@@ -256,7 +278,7 @@ const styles = StyleSheet.create({
         maxWidth: '90%',
     },
     backButton: {
-        backgroundColor: '#6759ff',
+        backgroundColor: '#900',
         padding: 15,
         borderRadius: 5,
         alignItems: 'center',

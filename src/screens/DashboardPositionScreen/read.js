@@ -18,6 +18,7 @@ const DetailPositionScreen = ({ route, navigation }) => {
     const [editModeSalary, setEditModeSalary] = useState(false);
     const [newSalary, setNewSalary] = useState('');
 
+    const [salaryModalVisible, setSalaryModalVisible] = useState(false);
     
     const [selectedSalaryOption, setSelectedSalaryOption] = useState(null);
     const [selectedSalary, setSelectedSalary] = useState(null);
@@ -140,7 +141,15 @@ const DetailPositionScreen = ({ route, navigation }) => {
                 ...prevDetail,
                 description: newDescription,
             }));
-
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Behasil Mengubah Deskripsi Jabatan.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
             setEditModeDescription(false); // Nonaktifkan mode edit setelah berhasil disimpan
         } catch (error) {
             console.error('Error saving Desctiption:', error);
@@ -183,7 +192,15 @@ const DetailPositionScreen = ({ route, navigation }) => {
                 ...prevDetail,
                 position_name: newPositionName,
             }));
-
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Behasil Mengganti Nama Posisi Jabatan.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
             setEditModePosition(false); // Nonaktifkan mode edit setelah berhasil disimpan
         } catch (error) {
             console.error('Error saving position:', error);
@@ -200,7 +217,8 @@ const DetailPositionScreen = ({ route, navigation }) => {
     };
 
     const handleEditSalary = () => {
-        setEditModeSalary(true);
+        // setEditModeSalary(true);
+        setSalaryModalVisible(true); 
 
     };
     const handleSaveSalary = async () => {
@@ -227,8 +245,16 @@ const DetailPositionScreen = ({ route, navigation }) => {
                 ...prevDetail,
                 position_salary_id: selectedSalaryOption,
             }));
-
-            setEditModeSalary(false);
+            SweetAlert.showAlertWithOptions({
+                title: 'Success',
+                subTitle: 'Behasil Mengubah Gaji.',
+                confirmButtonTitle: 'OK',
+                confirmButtonColor: '#c71515',
+                style: 'success',
+                cancellable: true,
+                subTitleStyle: { fontSize: 16 },
+            });
+            setSalaryModalVisible(false);
         } catch (error) {
             console.error('Error saving salary:', error);
             SweetAlert.showAlertWithOptions({
@@ -281,16 +307,17 @@ const DetailPositionScreen = ({ route, navigation }) => {
                 <Text style={styles.label}>Salary:</Text>
                 {editModeSalary ? (
                     <View style={styles.editContainer}>
-                        {salariesAll.map((salary) => (
+                        {/* {salariesAll.map((salary) => (
                             <View key={salary.id} style={styles.radioContainer}>
-                                <RadioButton.Android
-                                    value={salary.id.toString()} // Make sure to use string as value
+                                <RadioButton
+                                    style={styles.radio}
+                                    value={salary.id.toString()}
                                     status={selectedSalaryOption === salary.id ? 'checked' : 'unchecked'}
                                     onPress={() => setSelectedSalaryOption(salary.id)}
                                 />
                                 <Text style={styles.radioText}>{formatCurrency(salary.gaji_pokok)}</Text>
                             </View>
-                        ))}
+                        ))} */}
                         <TouchableOpacity onPress={handleSaveSalary} style={styles.icon}>
                             <FontAwesomeIcon icon={faSave} size={20} color="#4caf50" />
                         </TouchableOpacity>
@@ -334,6 +361,46 @@ const DetailPositionScreen = ({ route, navigation }) => {
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Employee Management')}>
                 <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
+            <Modal
+                transparent={true}
+                animationType="slide"
+                visible={salaryModalVisible}
+                onRequestClose={() => setSalaryModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Select Salary</Text>
+                        <ScrollView>
+                            {salariesAll.map((salary) => (
+                                <Pressable
+                                    key={salary.id}
+                                    style={[
+                                        styles.radioContainer,
+                                        { backgroundColor: selectedSalaryOption === salary.id ? '#e0e0e0' : '#fff' }
+                                    ]}
+                                    onPress={() => setSelectedSalaryOption(salary.id)}
+                                >
+                                    <RadioButton
+                                        value={salary.id.toString()}
+                                        status={selectedSalaryOption === salary.id ? 'checked' : 'unchecked'}
+                                    />
+                                    <Text style={styles.radioText}>{formatCurrency(salary.gaji_pokok)}</Text>
+                                </Pressable>
+                            ))}
+                        </ScrollView>
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity onPress={() => setSalaryModalVisible(false)} style={styles.cancelButton}>
+                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleSaveSalary} style={styles.saveButton}>
+                                <Text style={styles.saveButtonText}>Save</Text>
+                            </TouchableOpacity>
+
+                        </View>
+
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -401,6 +468,67 @@ const styles = StyleSheet.create({
     icon: {
         marginLeft: 10,
     },
+
+    radioContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+        maxWidth: '90%',
+    },
+
+
+
+
+        modalContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          },
+          modalContent: {
+            backgroundColor: '#fff',
+            borderRadius: 10,
+            padding: 20,
+            width: '80%',
+            maxHeight: '80%',
+
+          },
+        modalTitle: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginBottom: 10,
+        },
+        saveButton: {
+            backgroundColor: '#4caf50',
+            padding: 15,
+            borderRadius: 5,
+            alignItems: 'center',
+            marginTop: 10,
+        },
+        saveButtonText: {
+            color: '#fff',
+            fontSize: 16,
+        },
+        cancelButton: {
+            backgroundColor: '#333',
+            padding: 10,
+            borderRadius: 5,
+            alignItems: 'center',
+            marginTop: 13,
+  
+           
+            
+       
+        },
+        cancelButtonText: {
+            color: '#fff',
+            fontSize: 16,
+     
+        },
+        buttonContainer:{
+            flexDirection:'row', justifyContent:'space-around'
+        }
+    
 });
 
 export default DetailPositionScreen;
