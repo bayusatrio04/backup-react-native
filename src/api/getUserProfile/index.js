@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const useUserProfile = () => {
+  const [id, setId] = useState('');
   const [email, setEmail] = useState('');
   const [nama_depan, setNamaDepan] = useState('');
   
@@ -26,6 +27,7 @@ const useUserProfile = () => {
             },
           });
           const data = await response.json();
+          setId(data.id);
           setEmail(data.email);
           setNamaDepan(data.nama_depan);
           setNamaBelakang(data.nama_belakang);
@@ -42,7 +44,7 @@ const useUserProfile = () => {
     fetchUserProfile();
   }, []);
 
-  return { email, nama_depan, nama_belakang,tanggal_lahir, jenis_kelamin, no_telepon, position };
+  return {id, email, nama_depan, nama_belakang,tanggal_lahir, jenis_kelamin, no_telepon, position };
 };
 
 export default useUserProfile;

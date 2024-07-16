@@ -102,15 +102,15 @@ const ProfileScreen = ({ navigation }) => {
                 <View style={styles.infoValues}>
                     <View style={styles.infoLabelContainer}>
                         <Text style={styles.infoLabelText}>Overtime</Text>
-                        <Text style={styles.valueText}>20</Text>
+                        <Text style={styles.valueText}>0</Text>
                     </View>
                     <View style={styles.infoLabelContainer}>
                         <Text style={styles.infoLabelText}>Attendance</Text>
-                        <Text style={styles.valueText}>20</Text>
+                        <Text style={styles.valueText}>7</Text>
                     </View>
                     <View style={styles.infoLabelContainer}>
-                        <Text style={styles.infoLabelText}>TimeOff</Text>
-                        <Text style={styles.valueText}>20</Text>
+                        <Text style={styles.infoLabelText}>Sisa Cuti</Text>
+                        <Text style={styles.valueText}>12</Text>
                     </View>
                 </View>
             </View>

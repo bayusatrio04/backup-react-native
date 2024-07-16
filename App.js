@@ -80,7 +80,13 @@ import DashboardManageType from './src/screens/DashboardManageType';
 import TypeDetail from './src/screens/DashboardManageType/read';
 import DashboardManageTypeCreate from './src/screens/DashboardManageType/create';
 import AttendanceDetailScreen from './src/screens/AllAttendanceScreen/assets/AttendanceDetailScreen';
+import LeaveRequestScreen from './src/screens/LeaveRequestScreen';
+import CreateLeaveRequestScreen from './src/screens/LeaveRequestScreen/create';
 
+
+
+
+//Leave Cuti Izin Kerja Screen
 
 
 const Stack = createStackNavigator();
@@ -462,6 +468,28 @@ function AppNavigator() {
           <Stack.Screen
           name="Create New Type"
           component={DashboardManageTypeCreate}
+          options={{
+            headerShown:false
+          }}
+          
+        />
+
+
+
+
+        {/* Leave Request Screen */}
+     
+          <Stack.Screen
+          name="Cuti Izin Kerja"
+          component={LeaveRequestScreen}
+          options={{
+            headerShown:false
+          }}
+          
+        />
+                  <Stack.Screen
+          name="Formulir Cuti Izin Kerja"
+          component={CreateLeaveRequestScreen}
           options={{
             headerShown:false
           }}

@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, Modal, TouchableOpacity, Alert, TextI
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faChevronLeft, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faChevronLeft, faDollar, faMoneyCheckDollar, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 export default function HistorySalaries({ navigation }) {
   const currentYear = new Date().getFullYear();
@@ -104,7 +104,10 @@ export default function HistorySalaries({ navigation }) {
 
       <View style={styles.contentContainer}>
         {(typeof salaryData === 'undefined' || salaryData.length === 0) && !messages ? (
+          <>
+             <FontAwesomeIcon icon={faMoneyCheckDollar} size={100} color="#ccc" style={{alignSelf:'center', marginTop:20, position:'absolute'}} />
           <Text style={styles.messagesText}>Data penggajian belum tersedia. Silakan cek kembali nanti.</Text>
+          </>
         ) : (
           <FlatList
             data={salaryData}
@@ -243,7 +246,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
-    marginVertical: 'auto', // Centers the message vertically
+    marginVertical: 'auto', 
   },
   modalContainer: {
     flex: 1,

@@ -147,6 +147,15 @@ const BottomNavigation = ({modalVisible, setModalVisible}) => {
     navigation.navigate('Month Attendance History'); 
     console.log('Month Attendance History Screen')
   };
+
+  const goToCutiScreen = () => {
+    if (!isConnected) {
+        Alert.alert('No Internet Connection', 'Check your internet connection!');
+        return;
+      }
+    navigation.navigate('Cuti Izin Kerja'); 
+    console.log('Cuti Izin Kerja Screen')
+  };
   const buttonProfile = '#FF78C4';
   const buttonPayslip = '#E1AEFF';
   const buttonAll = '#e74c3c';
@@ -241,7 +250,7 @@ const Card = ({ title, backgroundColor, icon, onPress }) => (
 
         <View style={styles.row}>
           <Card title="Attendance" backgroundColor="#FFCCFF" icon={require('../src/assets/images/history_attendance_v1.png')} onPress={goToAllAttendance} />
-          <Card title="Cuti" backgroundColor="#FFCCCC" icon={require('../src/assets/images/cuti_v2.png')} />
+          <Card title="Cuti" backgroundColor="#FFCCCC" icon={require('../src/assets/images/cuti_v2.png')} onPress={goToCutiScreen} />
         </View>
 
         <View style={styles.quickAccessContainer}>

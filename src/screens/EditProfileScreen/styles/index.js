@@ -16,13 +16,14 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent:'center',
-      alignSelf:'center'
+      alignSelf:'center',
+      marginTop:50
     },
  
     headerTextProfile: {
       fontSize: 18,
       fontWeight: 'bold',
-      marginLeft: 100,
+      marginLeft: 140,
     },
 
     imageContainer: {

@@ -94,7 +94,7 @@ const EditProfileScreen = ({ navigation }) => {
             <View style={styles.header}>
                 <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Profile')}>
                     <FontAwesomeIcon icon={faChevronLeft} size={20} color="#020202" />
-                    <Text style={styles.headerTextProfile}>Edit Profile</Text>
+                    <Text style={styles.headerTextProfile}>Profile</Text>
                 </TouchableOpacity>
                 <View style={{ flex: 1 }} />
             </View>

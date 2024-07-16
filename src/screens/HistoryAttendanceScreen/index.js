@@ -345,7 +345,7 @@ export default function HistoryAttendance() {
                 style={styles.viewOnMapButton}
                 onPress={viewOnMap}
               >
-                <Text style={styles.viewOnMapButtonText}>View on Map</Text>
+                <Text style={styles.viewOnMapButtonText}>View Location</Text>
               </TouchableOpacity>
             </View>
           </View>

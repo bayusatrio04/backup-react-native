@@ -39,7 +39,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const isFocused = useIsFocused();
 
-  console.log(position);
+
 
   const [dashboardON, setDashboardON] = useState(true);
   const getGreeting = () => {
@@ -223,7 +223,7 @@ export default function HomeScreen() {
             Hi! {nama_depan} {nama_belakang}
           </Text>
         </View>
-        {position == 6 ? (
+        {position == 1 ? (
           <View style={styles.menuContainer}>
             <View style={styles.attendanceContainer}>
               <TouchableOpacity
